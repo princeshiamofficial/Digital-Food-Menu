@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Bulletproof Responsive Social Media Icons */
+.social-btn {
+  width: 36px !important;
+  height: 36px !important;
+}
+@media (min-width: 640px) {
+  .social-btn {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+.social-icon {
+  width: 15px !important;
+  height: 15px !important;
+}
+@media (min-width: 640px) {
+  .social-icon {
+    width: 16px !important;
+    height: 16px !important;
+  }
+}
