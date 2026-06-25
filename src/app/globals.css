@@ -10,6 +10,14 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Deep Emerald Design System Tokens */
+  --color-deep-emerald-950: #01241e;
+  --color-deep-emerald-900: #023129;
+  --color-deep-emerald-850: #033f35;
+  --color-deep-emerald-800: #044b3e;
+  --color-deep-emerald-750: #055546;
+  --color-deep-emerald-700: #065f4f;
 }
 
 body {

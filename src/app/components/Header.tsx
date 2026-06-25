@@ -2,15 +2,21 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
+  const pathname = usePathname();
   const [cartCount, setCartCount] = useState(12);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const isHomeActive = pathname === "/";
+  const isRestaurantActive = pathname === "/restaurants";
+
   return (
-    <header className="w-full px-0 md:px-6 bg-transparent relative z-50">
-      {/* Flawless Floating White Card Container sitting flush at the top */}
-      <div className="mx-auto max-w-7xl bg-white rounded-none md:rounded-b-[28px] border-b border-neutral-100/70 md:border md:border-t-0 shadow-sm md:shadow-[0_8px_30px_rgb(0,0,0,0.015)] px-6 py-4 md:px-8 md:py-4.5 flex items-center justify-between transition-all duration-300">
+    <header className="w-full px-0 md:px-6 bg-transparent sticky top-0 z-50">
+      {/* Flawless Floating DeepEmerald Card Container sitting flush at the top */}
+      <div className="mx-auto max-w-7xl bg-deep-emerald-950 rounded-none md:rounded-b-[28px] border-b border-deep-emerald-900 md:border md:border-t-0 shadow-sm md:shadow-[0_8px_30px_rgba(0,0,0,0.03)] px-6 py-4 md:px-8 md:py-4.5 flex items-center justify-between transition-all duration-300">
 
         {/* Brand Logo and Text */}
         <a href="#" className="flex items-center gap-3 group">
@@ -23,35 +29,43 @@ export default function Header() {
               strokeWidth="3.2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-[25px] h-[25px] text-black"
+              className="w-[25px] h-[25px] text-white"
             >
               <path d="M4 18c0-3 3-5 6-5s4.5-1 5.5-3S15.5 4 13.5 4s-4 2-4 5c0 4 3 6 6 8s3.5 3 4.5 3" />
             </svg>
           </div>
-          <span className="text-[19px] font-bold tracking-[-0.02em] text-black font-sans">
+          <span className="text-[19px] font-bold tracking-[-0.02em] text-white font-sans">
             Stuffsus
           </span>
         </a>
 
-        {/* Center Navigation Links (Identical to image: no dot active indicator, pure bold black text) */}
+        {/* Center Navigation Links (Identical to image: no dot active indicator, pure bold white text) */}
         <nav className="hidden md:flex items-center gap-10">
           <a
-            href="#"
-            className="text-[14px] font-medium text-neutral-400 hover:text-black transition-colors duration-200"
+            href="/"
+            className={`text-[14px] transition-colors ${
+              isHomeActive
+                ? "font-bold text-white"
+                : "font-medium text-neutral-400 hover:text-white duration-200"
+            }`}
           >
-            Beranda
+            Home
+          </a>
+          <a
+            href="/restaurants"
+            className={`text-[14px] transition-colors ${
+              isRestaurantActive
+                ? "font-bold text-white"
+                : "font-medium text-neutral-400 hover:text-white duration-200"
+            }`}
+          >
+            Restaurant
           </a>
           <a
             href="#"
-            className="text-[14px] font-bold text-black transition-colors"
+            className="text-[14px] font-medium text-neutral-400 hover:text-white transition-colors duration-200"
           >
-            Shop
-          </a>
-          <a
-            href="#"
-            className="text-[14px] font-medium text-neutral-400 hover:text-black transition-colors duration-200"
-          >
-            Blog
+            Contact
           </a>
         </nav>
 
@@ -60,7 +74,7 @@ export default function Header() {
           {/* Search Circle Button */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className="relative flex items-center justify-center w-11 h-11 rounded-full bg-white border border-neutral-100 hover:bg-neutral-50 hover:scale-[1.03] transition-all duration-200 group focus:outline-none shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
+            className="relative flex items-center justify-center w-11 h-11 rounded-full bg-deep-emerald-900 border border-deep-emerald-850 hover:bg-deep-emerald-800 hover:scale-[1.03] transition-all duration-200 group focus:outline-none shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
             aria-label="Search"
           >
             <svg
@@ -70,7 +84,7 @@ export default function Header() {
               strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-[17px] h-[17px] text-black group-hover:scale-[1.03] transition-transform"
+              className="w-[17px] h-[17px] text-white group-hover:scale-[1.03] transition-transform"
             >
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -79,7 +93,7 @@ export default function Header() {
 
           {/* Cart Circle Button with Red Badge */}
           <button
-            className="relative flex items-center justify-center w-11 h-11 rounded-full bg-white border border-neutral-100 hover:bg-neutral-50 hover:scale-[1.03] transition-all duration-200 group focus:outline-none shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
+            className="relative flex items-center justify-center w-11 h-11 rounded-full bg-deep-emerald-900 border border-deep-emerald-850 hover:bg-deep-emerald-800 hover:scale-[1.03] transition-all duration-200 group focus:outline-none shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
             aria-label="Shopping Cart"
           >
             <svg
@@ -89,7 +103,7 @@ export default function Header() {
               strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-[17px] h-[17px] text-black group-hover:scale-[1.03] transition-transform"
+              className="w-[17px] h-[17px] text-white group-hover:scale-[1.03] transition-transform"
             >
               <circle cx="9" cy="21" r="1" />
               <circle cx="20" cy="21" r="1" />
@@ -98,7 +112,7 @@ export default function Header() {
 
             {/* Red Notification Badge - Recreated perfectly */}
             {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#f43f5e] text-[10px] font-bold text-white shadow-sm ring-2 ring-white animate-in zoom-in duration-300">
+              <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#f43f5e] text-[10px] font-bold text-white shadow-sm ring-2 ring-deep-emerald-950 animate-in zoom-in duration-300">
                 {cartCount}
               </span>
             )}
@@ -106,7 +120,7 @@ export default function Header() {
 
           {/* User Profile Sunglasses Avatar - Identical to Mockup */}
           <button
-            className="relative hidden md:flex items-center justify-center w-11 h-11 rounded-full overflow-hidden border border-neutral-100 hover:scale-[1.04] transition-all duration-200 focus:outline-none shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
+            className="relative hidden md:flex items-center justify-center w-11 h-11 rounded-full overflow-hidden border border-deep-emerald-800 hover:scale-[1.04] transition-all duration-200 focus:outline-none shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
             aria-label="User Account"
           >
             <Image
@@ -122,7 +136,7 @@ export default function Header() {
           {/* Mobile Menu Hamburger Toggle */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="flex md:hidden items-center justify-center w-11 h-11 rounded-full bg-white border border-neutral-100 hover:bg-neutral-50 hover:scale-[1.03] transition-all duration-200 focus:outline-none"
+            className="flex md:hidden items-center justify-center w-11 h-11 rounded-full bg-deep-emerald-900 border border-deep-emerald-850 hover:bg-deep-emerald-800 hover:scale-[1.03] transition-all duration-200 focus:outline-none"
             aria-label="Toggle Menu"
           >
             {isMobileMenuOpen ? (
@@ -133,7 +147,7 @@ export default function Header() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-5 h-5 text-black"
+                className="w-5 h-5 text-white"
               >
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
@@ -146,7 +160,7 @@ export default function Header() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-5 h-5 text-black"
+                className="w-5 h-5 text-white"
               >
                 <line x1="4" y1="12" x2="20" y2="12" />
                 <line x1="4" y1="6" x2="20" y2="6" />
@@ -160,13 +174,13 @@ export default function Header() {
 
       {/* Mobile Responsive Navigation Drawer */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/35 backdrop-blur-sm transition-all duration-300 flex flex-col justify-start pt-24 px-4">
-          <div className="w-full max-w-md mx-auto bg-white rounded-[24px] border border-neutral-100 shadow-2xl p-6 flex flex-col gap-5 animate-in slide-in-from-top-12 duration-300">
-            <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-              <span className="text-xs font-bold uppercase tracking-widest text-neutral-400">Navigation</span>
+        <div className="md:hidden fixed inset-0 z-40 bg-black/45 backdrop-blur-sm transition-all duration-300 flex flex-col justify-start pt-24 px-4">
+          <div className="w-full max-w-md mx-auto bg-deep-emerald-950 rounded-[24px] border border-deep-emerald-900 shadow-2xl p-6 flex flex-col gap-5 animate-in slide-in-from-top-12 duration-300">
+            <div className="flex items-center justify-between border-b border-deep-emerald-900 pb-3">
+              <span className="text-xs font-bold uppercase tracking-widest text-neutral-500">Navigation</span>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-xs font-bold text-neutral-500 hover:text-black"
+                className="text-xs font-bold text-neutral-400 hover:text-white"
               >
                 Close
               </button>
@@ -174,25 +188,29 @@ export default function Header() {
 
             <nav className="flex flex-col gap-4">
               <a
-                href="#"
+                href="/"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-[15px] font-medium text-neutral-400 hover:text-black transition-colors py-1"
+                className={`text-[15px] transition-colors py-1 ${
+                  isHomeActive ? "font-bold text-white" : "font-medium text-neutral-400 hover:text-white"
+                }`}
               >
-                Beranda
+                Home
+              </a>
+              <a
+                href="/restaurants"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`text-[15px] transition-colors py-1 ${
+                  isRestaurantActive ? "font-bold text-white" : "font-medium text-neutral-400 hover:text-white"
+                }`}
+              >
+                Restaurant
               </a>
               <a
                 href="#"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-[15px] font-bold text-black py-1"
+                className="text-[15px] font-medium text-neutral-400 hover:text-white transition-colors py-1"
               >
-                Shop
-              </a>
-              <a
-                href="#"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-[15px] font-medium text-neutral-400 hover:text-black transition-colors py-1"
-              >
-                Blog
+                Contact
               </a>
             </nav>
           </div>
