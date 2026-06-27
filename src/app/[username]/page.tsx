@@ -358,7 +358,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
 
                     {/* Search Option - placed below location */}
                     {activeTab === "menu" && (
-                      <div className="relative flex items-center shrink-0 mt-2 max-w-[200px] sm:max-w-xs">
+                      <div className="relative z-20 top-3 flex items-center shrink-0 mt-3 max-w-[200px] sm:max-w-xs">
                         <div className="absolute left-3 text-neutral-400 pointer-events-none">
                           <Search className="w-3 h-3" />
                         </div>
