@@ -375,8 +375,26 @@ export default function RestaurantMenuPage({ params }: PageProps) {
 
                   {/* Brand details */}
                   <div className="flex flex-col pb-1 min-w-0 relative -top-1.5 sm:top-0 gap-1 text-left ml-1 sm:ml-0">
-                    <h1 className="text-lg sm:text-[22px] font-black text-neutral-900 tracking-tight leading-none truncate">
-                      {restaurant.name}
+                    <h1 className="text-base sm:text-[20px] font-black text-neutral-900 tracking-tight leading-none flex items-center gap-1.5 min-w-0">
+                      <span className="truncate">{restaurant.name}</span>
+                      <svg 
+                        viewBox="0 0 24 24" 
+                        className="w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0" 
+                      >
+                        <title>Verified Restaurant</title>
+                        <path 
+                          d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" 
+                          fill="#1877F2" 
+                        />
+                        <path 
+                          d="m9 12 2 2 4-4" 
+                          fill="none" 
+                          stroke="white" 
+                          strokeWidth="2.5" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                        />
+                      </svg>
                     </h1>
                     <span className="text-[11px] sm:text-xs text-neutral-500 font-bold flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
