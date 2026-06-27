@@ -334,7 +334,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
               <div className="px-6 sm:px-8 pb-6 flex items-center gap-5">
 
                 {/* Left Side: Avatar Profile Image & Text Info */}
-                <div className="flex flex-row items-end sm:items-center gap-4 sm:gap-5 text-left">
+                <div className="flex flex-row items-end sm:items-center gap-2 sm:gap-5 text-left">
                   {/* Circular Profile Avatar (Logo) */}
                   <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 border-white bg-white overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] relative flex-shrink-0 -mt-12 sm:-mt-18 md:-mt-22">
                     <Image
@@ -347,7 +347,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                   </div>
 
                   {/* Brand details */}
-                  <div className="flex flex-col pb-1 min-w-0 relative -top-1.5 sm:-top-5 gap-1 text-left ml-3 sm:ml-0">
+                  <div className="flex flex-col pb-1 min-w-0 relative -top-1.5 sm:-top-5 gap-1 text-left ml-1 sm:ml-0">
                     <h1 className="text-lg sm:text-[22px] font-black text-neutral-900 tracking-tight leading-none truncate">
                       {restaurant.name}
                     </h1>
