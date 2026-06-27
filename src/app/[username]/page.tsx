@@ -331,7 +331,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
             <div className="bg-white rounded-t-2xl sm:rounded-t-3xl -mt-10 sm:-mt-16 md:-mt-20 pt-3 relative z-10 shadow-md">
 
               {/* Profile Details Row */}
-              <div className="px-3 sm:px-8 pb-6 flex items-center gap-5">
+              <div className="px-3 sm:px-8 pb-3 flex items-center gap-5">
 
                 {/* Left Side: Avatar Profile Image & Text Info */}
                 <div className="flex flex-row items-end sm:items-center gap-2 sm:gap-5 text-left">
@@ -355,34 +355,89 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                       <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
                       <span>{restaurant.location}</span>
                     </span>
-
-                    {/* Search Option - placed below location */}
-                    {activeTab === "menu" && (
-                      <div className="relative z-20 flex items-center shrink-0 mt-2.5 max-w-[220px] sm:max-w-xs group">
-                        <div className="absolute left-3.5 text-neutral-400 pointer-events-none transition-colors group-focus-within:text-emerald-600">
-                          <Search className="w-3.5 h-3.5" />
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Search menu..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="bg-neutral-50/70 hover:bg-neutral-100/80 focus:bg-white text-xs font-bold text-neutral-800 placeholder-neutral-400/90 pl-10 pr-8.5 py-2 rounded-xl border border-neutral-200 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 outline-none w-full transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.03)]"
-                        />
-                        {searchQuery && (
-                          <button
-                            onClick={() => setSearchQuery("")}
-                            className="absolute right-2.5 w-5 h-5 rounded-full bg-neutral-200/50 hover:bg-neutral-200 flex items-center justify-center text-[9px] text-neutral-500 hover:text-neutral-700 transition-colors cursor-pointer"
-                            title="Clear search"
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
 
+              </div>
+
+              {/* Desktop Tabs */}
+              <div className="hidden md:flex justify-between items-center border-t border-neutral-100/80 px-8">
+                <div className="flex gap-2 -mb-[1px]">
+                  <button
+                    onClick={() => {
+                      setActiveTab("menu");
+                      setIsCartExpanded(false);
+                    }}
+                    className={`py-4 px-4 text-sm font-bold relative transition-colors cursor-pointer ${activeTab === "menu"
+                        ? "text-emerald-600 font-extrabold"
+                        : "text-neutral-500 hover:text-neutral-800"
+                      }`}
+                  >
+                    Menu
+                    {activeTab === "menu" && (
+                      <span className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-600 rounded-t-full" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab("about");
+                      setIsCartExpanded(false);
+                    }}
+                    className={`py-4 px-4 text-sm font-bold relative transition-colors cursor-pointer ${activeTab === "about"
+                        ? "text-emerald-600 font-extrabold"
+                        : "text-neutral-500 hover:text-neutral-800"
+                      }`}
+                  >
+                    About
+                    {activeTab === "about" && (
+                      <span className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-600 rounded-t-full" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab("reviews");
+                      setIsCartExpanded(false);
+                    }}
+                    className={`py-4 px-4 text-sm font-bold relative transition-colors cursor-pointer ${activeTab === "reviews"
+                        ? "text-emerald-600 font-extrabold"
+                        : "text-neutral-500 hover:text-neutral-800"
+                      }`}
+                  >
+                    Reviews
+                    {activeTab === "reviews" && (
+                      <span className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-600 rounded-t-full" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Desktop Search Bar Option */}
+                <div className="py-2.5 flex items-center">
+                  <div className="relative w-64">
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-neutral-400" />
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="Search menu..."
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        if (activeTab !== "menu") {
+                          setActiveTab("menu");
+                        }
+                      }}
+                      className="block w-full pl-9 pr-8 py-1.5 text-xs font-semibold bg-neutral-50/60 border border-neutral-200/80 rounded-l-full rounded-r-none focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white transition-all placeholder-neutral-400"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral-400 hover:text-neutral-600 transition-colors"
+                      >
+                        <span className="text-sm font-bold">×</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
 
             </div>
@@ -392,9 +447,8 @@ export default function RestaurantMenuPage({ params }: PageProps) {
 
 
 
-        <div className={`w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-6 flex flex-col md:flex-row gap-6 items-start ${
-          totalItems > 0 ? "pb-48 md:pb-48" : "pb-36 md:pb-32"
-        }`}>
+        <div className={`w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-0 md:mt-6 flex flex-col md:flex-row gap-6 items-start ${totalItems > 0 ? "pb-48 md:pb-48" : "pb-36 md:pb-32"
+          }`}>
 
           {/* LEFT SIDEBAR: Intro Card Box */}
           {activeTab !== "menu" && (
@@ -441,7 +495,47 @@ export default function RestaurantMenuPage({ params }: PageProps) {
             {activeTab === "menu" && (
               <div className="flex flex-col gap-4 w-full">
 
+                {/* Mobile Search Bar */}
+                <div className="block md:hidden w-[65%] max-w-[240px] ml-auto -mr-4 sticky top-14 z-30 mt-0">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4 text-neutral-400" />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Search menu..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="block w-full pl-9 pr-8 py-2.5 text-xs font-semibold bg-white border border-neutral-200/80 rounded-l-full rounded-r-none focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white transition-all placeholder-neutral-400 shadow-sm"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral-400 hover:text-neutral-600 transition-colors"
+                    >
+                      <span className="text-sm font-bold">×</span>
+                    </button>
+                  )}
+                </div>
 
+                {/* Category Selector Pills */}
+                <div className="flex gap-2 overflow-x-auto pt-3 pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth sticky top-0 md:relative md:top-auto z-30 bg-[#f0f2f5] -mt-2 md:mt-0">
+                  {categories.map((cat) => {
+                    const isActive = selectedCategory.toLowerCase() === cat.toLowerCase();
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`px-4 py-2 text-xs font-bold rounded-full border whitespace-nowrap transition-all duration-200 cursor-pointer active:scale-95 shrink-0 ${
+                          isActive
+                            ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                            : "bg-white text-neutral-650 hover:text-neutral-900 border-neutral-200/80 hover:bg-neutral-50"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    );
+                  })}
+                </div>
 
                 {/* Food Items List */}
                 {filteredItems.length === 0 ? (
@@ -800,7 +894,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
           {/* Right Part */}
           <div className="flex-1 bg-white rounded-tr-[24px] ml-[-2px]" />
         </div>
-        
+
         {/* Safe Area Fillers */}
         <div className="w-full flex h-[env(safe-area-inset-bottom)] -mt-0.5">
           {/* Left Part */}
@@ -821,9 +915,8 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                 <button
                   key={tab.id}
                   onClick={tab.onClick}
-                  className={`flex flex-col items-center justify-center gap-1 w-14 transition-all duration-200 cursor-pointer active:scale-95 ${
-                    tab.isActive ? "text-neutral-900 font-extrabold" : "text-[#b3b3b3] font-medium"
-                  }`}
+                  className={`flex flex-col items-center justify-center gap-1 w-14 transition-all duration-200 cursor-pointer active:scale-95 ${tab.isActive ? "text-neutral-900 font-extrabold" : "text-[#b3b3b3] font-medium"
+                    }`}
                 >
                   <Icon className="w-5.5 h-[18px]" />
                   <span className="text-[11px] tracking-tight leading-none">{tab.label}</span>
@@ -854,9 +947,8 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                 <button
                   key={tab.id}
                   onClick={tab.onClick}
-                  className={`flex flex-col items-center justify-center gap-1 w-14 transition-all duration-200 cursor-pointer active:scale-95 ${
-                    tab.isActive ? "text-neutral-900 font-extrabold" : "text-[#b3b3b3] font-medium"
-                  }`}
+                  className={`flex flex-col items-center justify-center gap-1 w-14 transition-all duration-200 cursor-pointer active:scale-95 ${tab.isActive ? "text-neutral-900 font-extrabold" : "text-[#b3b3b3] font-medium"
+                    }`}
                 >
                   <Icon className="w-5.5 h-[18px]" />
                   <span className="text-[11px] tracking-tight leading-none">{tab.label}</span>
