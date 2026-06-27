@@ -539,7 +539,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                 </div>
 
                 {/* Category Selector Pills */}
-                <div className="flex gap-2 overflow-x-auto pt-3 pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth sticky top-0 md:relative md:top-auto z-30 bg-[#f0f2f5] -mt-2 md:mt-0">
+                <div className="flex gap-2 overflow-x-auto pt-1 pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth sticky top-0 md:relative md:top-auto z-30 bg-[#f0f2f5] -mt-3 md:mt-0">
                   {categories.map((cat) => {
                     const isActive = selectedCategory.toLowerCase() === cat.toLowerCase();
                     return (
