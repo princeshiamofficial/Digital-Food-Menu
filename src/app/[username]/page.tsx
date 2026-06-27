@@ -347,7 +347,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                   </div>
 
                   {/* Brand details */}
-                  <div className="flex flex-col pb-1 min-w-0 relative -top-6 sm:-top-12 gap-1 text-left">
+                  <div className="flex flex-col pb-1 min-w-0 relative -top-6 sm:-top-12 gap-1 text-left ml-3 sm:ml-0">
                     <h1 className="text-lg sm:text-[22px] font-black text-neutral-900 tracking-tight leading-none truncate">
                       {restaurant.name}
                     </h1>
