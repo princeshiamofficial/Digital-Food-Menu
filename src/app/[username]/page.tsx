@@ -590,7 +590,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
               <div className="flex flex-col gap-4 w-full">
 
                 {/* Mobile Search Bar */}
-                <div className="block md:hidden w-[65%] max-w-[240px] ml-auto -mr-4 relative z-36 mt-0">
+                <div className="block md:hidden w-[65%] max-w-[240px] ml-auto -mr-4 relative z-20 mt-0">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Search className="h-4 w-4 text-neutral-400" />
                   </span>
