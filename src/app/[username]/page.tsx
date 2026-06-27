@@ -22,7 +22,8 @@ import {
   Share2,
   Calendar,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Utensils
 } from "lucide-react";
 
 interface PageProps {
@@ -52,6 +53,63 @@ const MOCK_REVIEWS_MAP: { [key: number]: Array<{ author: string; date: string; s
     { author: "Imran Hasan", date: "3 weeks ago", stars: 5, text: "Best place for authentic Chinese food lovers. Steamed jasmine rice is extremely fragrant.", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80" }
   ]
 };
+
+// Custom pixel-perfect SVG Icons matching the reference image layout
+const BillIcon = ({ className }: { className?: string }) => (
+  <svg width="22" height="16" viewBox="0 0 22 16" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="22" height="16" rx="3.5" fill="currentColor" />
+    <rect x="3.5" y="3.5" width="15" height="2.5" fill="white" />
+  </svg>
+);
+
+const ListIcon = ({ className }: { className?: string }) => (
+  <svg width="20" height="17" viewBox="0 0 20 17" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="20" height="17" rx="4.5" fill="currentColor" />
+    <rect x="5" y="5" width="10" height="3.5" rx="1.2" fill="white" />
+    <path d="M8 8.5 H12 V11.5 C12 12.5 11.5 12.5 10 12.5 C8.5 12.5 8 12.5 8 11.5 Z" fill="white" />
+  </svg>
+);
+
+const CalendarIcon = ({ className }: { className?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="4" width="16" height="14" rx="2.5" fill="white" />
+    <rect x="5.5" y="1" width="2" height="5.5" rx="1" fill="white" />
+    <rect x="12.5" y="1" width="2" height="5.5" rx="1" fill="white" />
+    <rect x="5.5" y="9" width="9" height="2" rx="0.5" fill="black" />
+    <rect x="5.5" y="13" width="6" height="2" rx="0.5" fill="black" />
+  </svg>
+);
+
+const BagIcon = ({ className }: { className?: string }) => (
+  <svg width="16" height="22" viewBox="0 0 16 22" className={className} fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 0 2 
+             A 2 2 0 0 1 2 0 
+             L 14 0 
+             A 2 2 0 0 1 16 2 
+             L 16 8 
+             A 3 3 0 0 0 13 11
+             A 3 3 0 0 0 16 14
+             L 16 20 
+             A 2 2 0 0 1 14 22 
+             L 2 22 
+             A 2 2 0 0 1 0 20 
+             L 0 14 
+             A 3 3 0 0 0 3 11
+             A 3 3 0 0 0 0 8 
+             Z" />
+    <circle cx="8" cy="5.5" r="1.2" fill="white" />
+    <circle cx="8" cy="11" r="1.2" fill="white" />
+    <circle cx="8" cy="16.5" r="1.2" fill="white" />
+  </svg>
+);
+
+const MyIcon = ({ className }: { className?: string }) => (
+  <svg width="22" height="22" viewBox="0 0 22 22" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="11" cy="11" r="10" stroke="currentColor" strokeWidth="2.5" fill="none" />
+    <circle cx="11" cy="7.5" r="3" fill="currentColor" />
+    <path d="M4.5 17C4.5 14.5 7.5 13 11 13C14.5 13 17.5 14.5 17.5 17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+  </svg>
+);
 
 export default function RestaurantMenuPage({ params }: PageProps) {
   const resolvedParams = use(params);
@@ -193,6 +251,58 @@ export default function RestaurantMenuPage({ params }: PageProps) {
     triggerToast(`Order placed successfully for Table #${tableNumber}!`);
   };
 
+  const leftNavItems = [
+    {
+      id: "bill",
+      label: "Bill",
+      icon: BillIcon,
+      onClick: () => {
+        if (totalItems > 0) {
+          handlePlaceOrder();
+        } else {
+          triggerToast("Your selection is empty! Add items from the Menu.");
+        }
+      },
+      isActive: false
+    },
+    {
+      id: "list",
+      label: "List",
+      icon: ListIcon,
+      onClick: () => {
+        setActiveTab("menu");
+        setIsCartExpanded(false);
+      },
+      isActive: activeTab === "menu" && !isCartExpanded
+    }
+  ];
+
+  const rightNavItems = [
+    {
+      id: "bag",
+      label: "Bag",
+      icon: BagIcon,
+      onClick: () => {
+        if (totalItems > 0) {
+          setIsCartExpanded(!isCartExpanded);
+        } else {
+          triggerToast("Your bag is empty! Add items from the Menu.");
+        }
+      },
+      isActive: isCartExpanded
+    },
+    {
+      id: "my",
+      label: "My",
+      icon: MyIcon,
+      onClick: () => {
+        setActiveTab("about");
+        setIsCartExpanded(false);
+      },
+      isActive: activeTab === "about" && !isCartExpanded
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-[#f0f2f5] flex flex-col font-sans antialiased pb-0 select-none text-neutral-800">
       {/* Sticky Header */}
@@ -202,7 +312,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
       <main className="flex-1 w-full flex flex-col">
 
         {/* Facebook Style Cover Photo Card Container */}
-        <div className="w-full bg-[#f0f2f5] border-b border-neutral-200 shadow-sm">
+        <div className="w-full bg-[#f0f2f5] shadow-sm">
           <div className="max-w-6xl mx-auto relative">
             {/* Cover image wrap */}
             <div className="relative w-full h-[180px] sm:h-[300px] md:h-[350px] overflow-hidden bg-neutral-200 md:rounded-b-xl">
@@ -250,33 +360,42 @@ export default function RestaurantMenuPage({ params }: PageProps) {
 
               </div>
 
-              {/* Profile Navigation Tabs Bar */}
-              <div className="border-t border-neutral-200/80 px-6 sm:px-8 bg-white flex items-center justify-between gap-4 w-full rounded-b-2xl sm:rounded-b-3xl">
-                <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-                  {[
-                    { id: "menu", label: "Menu Items" },
-                    { id: "about", label: "About" }
-                  ].map((tab) => {
-                    const isActive = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id as any)}
-                        className={`relative py-3.5 px-3.5 text-xs sm:text-sm font-bold tracking-tight cursor-pointer whitespace-nowrap outline-none transition-colors ${isActive
-                            ? "text-emerald-700 font-extrabold"
-                            : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800"
-                          }`}
-                      >
-                        <span>{tab.label}</span>
-                        {isActive && (
-                          <span className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-700 rounded-t-full" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+            </div>
 
-                {/* Right side search option */}
+          </div>
+        </div>
+
+        {/* Sticky Profile Navigation Tabs Bar */}
+        <div className="sticky top-0 z-35 w-full bg-[#f0f2f5] border-b border-neutral-200 shadow-sm">
+          <div className="max-w-6xl mx-auto relative">
+            <div className="border-t border-neutral-200/80 px-6 sm:px-8 bg-white flex items-center justify-between gap-4 w-full">
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+                {[
+                  { id: "menu", label: "Menu Items" },
+                  { id: "about", label: "About" },
+                  { id: "reviews", label: "Reviews" }
+                ].map((tab) => {
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id as any)}
+                      className={`relative py-3.5 px-3.5 text-xs sm:text-sm font-bold tracking-tight cursor-pointer whitespace-nowrap outline-none transition-colors ${isActive
+                          ? "text-emerald-700 font-extrabold"
+                          : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-800"
+                        }`}
+                    >
+                      <span>{tab.label}</span>
+                      {isActive && (
+                        <span className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-700 rounded-t-full" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Right side search option */}
+              {activeTab === "menu" && (
                 <div className="relative flex items-center shrink-0 my-1">
                   <div className="absolute left-3 text-neutral-400 pointer-events-none">
                     <Search className="w-3.5 h-3.5" />
@@ -298,15 +417,13 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                     </button>
                   )}
                 </div>
-              </div>
-
+              )}
             </div>
-
           </div>
         </div>
 
         <div className={`w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-6 flex flex-col md:flex-row gap-6 items-start ${
-          totalItems > 0 ? "pb-48" : "pb-32"
+          totalItems > 0 ? "pb-48 md:pb-48" : "pb-36 md:pb-32"
         }`}>
 
           {/* LEFT SIDEBAR: Intro Card Box */}
@@ -590,44 +707,26 @@ export default function RestaurantMenuPage({ params }: PageProps) {
       </main>
 
       {/* Floating Bottom Cart Drawer */}
-      {totalItems > 0 && (
-        <div className={`fixed bottom-0 left-0 right-0 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-3xl z-40 bg-white border-t border-neutral-200/85 md:border-x shadow-[0_-12px_40px_rgba(0,0,0,0.06)] transition-all duration-300 pb-safe ${isCartExpanded ? "rounded-t-[28px]" : "rounded-t-none md:rounded-t-[28px]"
-          }`}>
+      {totalItems > 0 && isCartExpanded && (
+        <div className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] md:bottom-0 left-0 right-0 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-3xl z-40 bg-white border border-neutral-200/85 rounded-t-[28px] md:rounded-t-[28px] shadow-[0_-12px_40px_rgba(0,0,0,0.06)] transition-all duration-300 pb-safe">
           {/* Inner constraint */}
-          <div className="max-w-3xl mx-auto flex flex-col">
-
-            {/* Header/Collapse Handle */}
-            <div
-              onClick={() => setIsCartExpanded(!isCartExpanded)}
-              className="px-6 py-4 flex items-center justify-between border-b border-neutral-100/80 cursor-pointer hover:bg-neutral-50/50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center relative">
-                  <ShoppingBag className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
-                    {totalItems}
-                  </span>
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-sm font-black text-neutral-900">Your Selection</span>
-                  <span className="text-[11px] font-semibold text-neutral-500">
-                    Subtotal: <span className="text-emerald-700 font-bold">${totalPrice.toFixed(2)}</span>
-                  </span>
-                </div>
-              </div>
-
-              {/* Chevron indicator */}
-              <div className="text-neutral-400">
-                {isCartExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
-              </div>
-            </div>
-
+          <div className="max-w-3xl mx-auto flex flex-col px-6 py-5">
             {/* Expandable Cart Items list container */}
-            {isCartExpanded && (
-              <div className="px-6 py-5 flex flex-col gap-4 max-h-[300px] overflow-y-auto divide-y divide-neutral-50 animate-in slide-in-from-bottom-8 duration-300">
-                {cartItemsList.map((entry) => (
-                  <div key={entry.item.id} className="flex items-center justify-between pt-3 first:pt-0">
-                    <div className="flex flex-col text-left min-w-0 pr-4">
+            <div className="flex flex-col gap-4 max-h-[300px] overflow-y-auto divide-y divide-neutral-50 animate-in slide-in-from-bottom-8 duration-300">
+              {cartItemsList.map((entry) => (
+                <div key={entry.item.id} className="flex items-center justify-between pt-3 first:pt-0">
+                  <div className="flex items-center gap-3 min-w-0 flex-1 pr-4">
+                    {/* Food Item Image */}
+                    <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-neutral-100 border border-neutral-200">
+                      <Image
+                        src={entry.item.image}
+                        alt={entry.item.name}
+                        fill
+                        className="object-cover"
+                        sizes="48px"
+                      />
+                    </div>
+                    <div className="flex flex-col text-left min-w-0">
                       <span className="text-sm font-bold text-neutral-900 truncate">
                         {entry.item.name}
                       </span>
@@ -635,47 +734,43 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                         ${(entry.item.price * entry.quantity).toFixed(2)}
                       </span>
                     </div>
-
-                    {/* Quantity Selector inside cart */}
-                    <div className="flex items-center gap-2.5 bg-neutral-100 rounded-full p-1 border border-neutral-200/40">
-                      <button
-                        onClick={() => removeFromCart(entry.item.id)}
-                        className="w-6 h-6 rounded-full bg-white hover:bg-neutral-200 flex items-center justify-center font-bold text-xs text-neutral-700 cursor-pointer transition-colors"
-                      >
-                        <Minus className="w-2.5 h-2.5" />
-                      </button>
-                      <span className="text-xs font-bold w-4 text-center text-neutral-800">
-                        {entry.quantity}
-                      </span>
-                      <button
-                        onClick={() => addToCart(entry.item.id)}
-                        className="w-6 h-6 rounded-full bg-white hover:bg-neutral-200 flex items-center justify-center font-bold text-xs text-neutral-700 cursor-pointer transition-colors"
-                      >
-                        <Plus className="w-2.5 h-2.5" />
-                      </button>
-                    </div>
                   </div>
-                ))}
-              </div>
-            )}
 
-            {/* Bottom Checkout Actions Area */}
-            <div className="px-6 py-4 border-t border-neutral-100 flex items-center justify-between gap-4">
-              <div className="hidden sm:flex flex-col text-left">
-                <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest leading-none">Total Bill</span>
-                <span className="text-xl font-black text-neutral-950 mt-1">
-                  ${totalPrice.toFixed(2)}
-                </span>
-              </div>
+                  {/* Quantity Selector inside cart */}
+                  <div className="flex items-center gap-2.5 bg-neutral-100 rounded-full p-1 border border-neutral-200/40">
+                    <button
+                      onClick={() => removeFromCart(entry.item.id)}
+                      className="w-6 h-6 rounded-full bg-white hover:bg-neutral-200 flex items-center justify-center font-bold text-xs text-neutral-700 cursor-pointer transition-colors"
+                    >
+                      <Minus className="w-2.5 h-2.5" />
+                    </button>
+                    <span className="text-xs font-bold w-4 text-center text-neutral-800">
+                      {entry.quantity}
+                    </span>
+                    <button
+                      onClick={() => addToCart(entry.item.id)}
+                      className="w-6 h-6 rounded-full bg-white hover:bg-neutral-200 flex items-center justify-center font-bold text-xs text-neutral-700 cursor-pointer transition-colors"
+                    >
+                      <Plus className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
 
+            {/* Confirm Order Button Section */}
+            <div className="mt-4 pt-4 border-t border-neutral-100 flex flex-col gap-3">
+              <div className="flex justify-between items-center px-1 text-sm font-bold text-neutral-800">
+                <span>Total Amount:</span>
+                <span className="text-emerald-700 text-base font-extrabold">${totalPrice.toFixed(2)}</span>
+              </div>
               <button
                 onClick={handlePlaceOrder}
-                className="w-full sm:w-auto flex-1 sm:flex-initial bg-deep-emerald-950 hover:bg-deep-emerald-850 text-white text-sm font-bold py-3.5 px-8 rounded-2xl flex items-center justify-center gap-2.5 transition-all duration-200 active:scale-98 shadow-md cursor-pointer"
+                className="w-full bg-deep-emerald-950 hover:bg-deep-emerald-850 text-white text-sm font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2.5 transition-all duration-200 active:scale-98 shadow-md cursor-pointer"
               >
                 <span>Confirm & Place Order</span>
               </button>
             </div>
-
           </div>
         </div>
       )}
@@ -720,6 +815,86 @@ export default function RestaurantMenuPage({ params }: PageProps) {
           <span className="text-[13.5px] font-bold font-sans">{actionToast}</span>
         </div>
       )}
+
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden select-none filter drop-shadow-[0_-8px_24px_rgba(0,0,0,0.06)]">
+        {/* Combined Background Shape */}
+        <div className="relative w-full h-[72px] flex">
+          {/* Left Part */}
+          <div className="flex-1 bg-white rounded-tl-[24px] mr-[-2px]" />
+          {/* Center Curved Part */}
+          <svg className="w-[90px] h-[72px] shrink-0" viewBox="0 0 90 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 0 0 C 17 0, 17 44, 45 44 C 73 44, 73 0, 90 0 L 90 72 L 0 72 Z" fill="white" />
+          </svg>
+          {/* Right Part */}
+          <div className="flex-1 bg-white rounded-tr-[24px] ml-[-2px]" />
+        </div>
+        
+        {/* Safe Area Fillers */}
+        <div className="w-full flex h-[env(safe-area-inset-bottom)] -mt-0.5">
+          {/* Left Part */}
+          <div className="flex-1 bg-white mr-[-2px]" />
+          {/* Center Curved Part Spacer */}
+          <div className="w-[90px] bg-transparent shrink-0" />
+          {/* Right Part */}
+          <div className="flex-1 bg-white ml-[-2px]" />
+        </div>
+
+        {/* Buttons Overlay */}
+        <div className="absolute top-0 left-0 right-0 h-[72px] flex items-center">
+          {/* Left Side Buttons */}
+          <div className="flex-1 flex justify-around pr-4">
+            {leftNavItems.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={tab.onClick}
+                  className={`flex flex-col items-center justify-center gap-1 w-14 transition-all duration-200 cursor-pointer active:scale-95 ${
+                    tab.isActive ? "text-neutral-900 font-extrabold" : "text-[#b3b3b3] font-medium"
+                  }`}
+                >
+                  <Icon className="w-5.5 h-[18px]" />
+                  <span className="text-[11px] tracking-tight leading-none">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Center FAB Button */}
+          <div className="relative w-[72px] h-full flex justify-center items-start">
+            <button
+              onClick={() => {
+                setActiveTab("reviews");
+                setIsCartExpanded(false);
+              }}
+              className="absolute -top-5 w-14 h-14 bg-[#1a1a1a] hover:bg-black rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-all duration-255 cursor-pointer group"
+              title="Reviews"
+            >
+              <CalendarIcon className="w-5 h-5 text-white transition-transform group-hover:scale-105" />
+            </button>
+          </div>
+
+          {/* Right Side Buttons */}
+          <div className="flex-1 flex justify-around pl-4">
+            {rightNavItems.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={tab.onClick}
+                  className={`flex flex-col items-center justify-center gap-1 w-14 transition-all duration-200 cursor-pointer active:scale-95 ${
+                    tab.isActive ? "text-neutral-900 font-extrabold" : "text-[#b3b3b3] font-medium"
+                  }`}
+                >
+                  <Icon className="w-5.5 h-[18px]" />
+                  <span className="text-[11px] tracking-tight leading-none">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
     </div>
   );
