@@ -331,7 +331,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
             <div className="bg-white rounded-t-2xl sm:rounded-t-3xl -mt-10 sm:-mt-16 md:-mt-20 pt-3 relative z-10 shadow-md">
 
               {/* Profile Details Row */}
-              <div className="px-6 sm:px-8 pb-6 flex items-center gap-5">
+              <div className="px-3 sm:px-8 pb-6 flex items-center gap-5">
 
                 {/* Left Side: Avatar Profile Image & Text Info */}
                 <div className="flex flex-row items-end sm:items-center gap-2 sm:gap-5 text-left">
