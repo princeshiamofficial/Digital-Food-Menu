@@ -331,7 +331,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
             <div className="bg-white rounded-t-2xl sm:rounded-t-3xl -mt-10 sm:-mt-16 md:-mt-20 pt-3 relative z-10 shadow-md">
 
               {/* Profile Details Row */}
-              <div className="px-6 sm:px-8 pb-6 flex items-center justify-between gap-5">
+              <div className="px-6 sm:px-8 pb-6 flex items-center gap-5">
 
                 {/* Left Side: Avatar Profile Image & Text Info */}
                 <div className="flex flex-row items-end sm:items-center gap-4 sm:gap-5 text-left">
@@ -347,7 +347,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                   </div>
 
                   {/* Brand details */}
-                  <div className="flex flex-col pb-1 min-w-0 relative -top-6 sm:-top-12 gap-1">
+                  <div className="flex flex-col pb-1 min-w-0 relative -top-6 sm:-top-12 gap-1 text-left">
                     <h1 className="text-lg sm:text-[22px] font-black text-neutral-900 tracking-tight leading-none truncate">
                       {restaurant.name}
                     </h1>
@@ -355,33 +355,33 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                       <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
                       <span>{restaurant.location}</span>
                     </span>
-                  </div>
-                </div>
 
-                {/* Right Side: Search Option */}
-                {activeTab === "menu" && (
-                  <div className="relative flex items-center shrink-0 my-1 relative -top-4 sm:-top-10">
-                    <div className="absolute left-3 text-neutral-400 pointer-events-none">
-                      <Search className="w-3.5 h-3.5" />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Search menu..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="bg-neutral-50 hover:bg-neutral-100/70 focus:bg-white text-xs font-semibold text-neutral-800 placeholder-neutral-400 pl-9 pr-8 py-1.5 rounded-full border border-neutral-200 focus:border-emerald-600 outline-none w-32 sm:w-48 md:w-56 transition-all duration-200 shadow-sm"
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="absolute right-2.5 w-4 h-4 rounded-full bg-neutral-200/50 hover:bg-neutral-200 flex items-center justify-center text-[8px] text-neutral-500 transition-colors"
-                        title="Clear search"
-                      >
-                        ✕
-                      </button>
+                    {/* Search Option - placed below location */}
+                    {activeTab === "menu" && (
+                      <div className="relative flex items-center shrink-0 mt-2 max-w-[200px] sm:max-w-xs">
+                        <div className="absolute left-3 text-neutral-400 pointer-events-none">
+                          <Search className="w-3 h-3" />
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Search menu..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="bg-neutral-50 hover:bg-neutral-100/70 focus:bg-white text-[11px] font-semibold text-neutral-800 placeholder-neutral-400 pl-8 pr-7 py-1 rounded-full border border-neutral-200 focus:border-emerald-600 outline-none w-full transition-all duration-200 shadow-sm"
+                        />
+                        {searchQuery && (
+                          <button
+                            onClick={() => setSearchQuery("")}
+                            className="absolute right-2 w-4 h-4 rounded-full bg-neutral-200/50 hover:bg-neutral-200 flex items-center justify-center text-[8px] text-neutral-500 transition-colors"
+                            title="Clear search"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
+                </div>
 
               </div>
 
