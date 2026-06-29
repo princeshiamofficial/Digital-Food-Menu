@@ -261,5 +261,64 @@ export const RESTAURANTS: Restaurant[] = [
         category: "Beverages"
       }
     ]
+  },
+  {
+    id: 5,
+    name: "Red Chili Chinese Restaurant",
+    cuisine: "Sichuan & Cantonese Chinese",
+    rating: "4.8",
+    reviews: "210",
+    price: "$$",
+    time: "20-30 min",
+    location: "Dhanmondi, Dhaka",
+    logo: "R",
+    logoBg: "from-red-600 to-orange-700",
+    image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&auto=format&fit=crop&q=80",
+    logoImage: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=80&auto=format&fit=crop&q=80",
+    username: "redchilichinese",
+    menuItems: [
+      {
+        id: 51,
+        name: "Sichuan Chili Chicken",
+        description: "Crispy chicken cubes stir-fried with hot Sichuan peppercorns, dried red chilis, and fresh garlic.",
+        price: 13.50,
+        image: "https://images.unsplash.com/photo-1525755662778-989d0524087e?w=600&auto=format&fit=crop&q=80",
+        category: "Mains",
+        popular: true
+      },
+      {
+        id: 52,
+        name: "Beef with Oyster Sauce",
+        description: "Tender beef slices stir-fried with fresh broccoli, mushrooms, and scallions in rich oyster sauce.",
+        price: 15.00,
+        image: "https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=600&auto=format&fit=crop&q=80",
+        category: "Mains",
+        popular: true
+      },
+      {
+        id: 53,
+        name: "Yangzhou Fried Rice",
+        description: "Classic wok-fried Jasmine rice with shrimps, barbecue pork, green peas, and egg.",
+        price: 10.00,
+        image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80",
+        category: "Rice & Noodles"
+      },
+      {
+        id: 54,
+        name: "Steamed Chicken Dumplings",
+        description: "Handmade dumplings filled with seasoned minced chicken, served with soy dipping sauce.",
+        price: 8.00,
+        image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600&auto=format&fit=crop&q=80",
+        category: "Appetizers"
+      },
+      {
+        id: 55,
+        name: "Iced Lychee Tea",
+        description: "Sweet iced black tea infused with fragrant lychee fruit syrup and whole lychees.",
+        price: 3.50,
+        image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=600&auto=format&fit=crop&q=80",
+        category: "Beverages"
+      }
+    ]
   }
 ];

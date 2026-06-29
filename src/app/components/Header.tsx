@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { LogIn } from "lucide-react";
+import Link from "next/link";
 
 export default function Header() {
   const pathname = usePathname();
@@ -93,20 +94,15 @@ export default function Header() {
 
 
 
-          {/* User Profile Sunglasses Avatar - Identical to Mockup */}
-          <button
-            className="relative hidden md:flex items-center justify-center w-11 h-11 rounded-full overflow-hidden border border-deep-emerald-800 hover:scale-[1.04] transition-all duration-200 focus:outline-none shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
-            aria-label="User Account"
+          {/* Login Link */}
+          <Link
+            href="/login"
+            className="hidden md:flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-white hover:bg-neutral-100 text-deep-emerald-950 font-bold text-[14px] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 focus:outline-none shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+            aria-label="Login"
           >
-            <Image
-              src="https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=128&q=80"
-              alt="User Avatar"
-              width={44}
-              height={44}
-              className="object-cover w-full h-full scale-[1.1]"
-              priority
-            />
-          </button>
+            <LogIn className="w-[15px] h-[15px]" />
+            <span>Login</span>
+          </Link>
 
           {/* Mobile Menu Hamburger Toggle */}
           <button
@@ -187,6 +183,14 @@ export default function Header() {
               >
                 Contact
               </a>
+              <Link
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="mt-2 w-full flex items-center justify-center gap-2 py-2 px-5 rounded-full bg-white hover:bg-neutral-100 text-deep-emerald-950 font-bold text-[14px] active:scale-[0.98] transition-all duration-200 focus:outline-none shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+              >
+                <LogIn className="w-[15px] h-[15px]" />
+                <span>Login</span>
+              </Link>
             </nav>
           </div>
         </div>

@@ -5,6 +5,8 @@ import Image from "next/image";
 import { notFound, useSearchParams } from "next/navigation";
 
 import { RESTAURANTS } from "../data/restaurants";
+import Toast from "../../../ui/toast";
+import Button from "../../../ui/button";
 import {
   Star,
   MapPin,
@@ -53,6 +55,10 @@ const MOCK_REVIEWS_MAP: { [key: number]: Array<{ author: string; date: string; s
     { author: "Fahim Shahriar", date: "4 days ago", stars: 5, text: "Outstanding Sichuan wontons! The chilli oil is spicy, numbing, and has a sweet tang. Incredible flavor.", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80" },
     { author: "Anika Bushra", date: "1 week ago", stars: 4, text: "Very tasty Kung Pao chicken and silken mapo tofu. Fast turnaround for lunch hours.", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&auto=format&fit=crop&q=80" },
     { author: "Imran Hasan", date: "3 weeks ago", stars: 5, text: "Best place for authentic Chinese food lovers. Steamed jasmine rice is extremely fragrant.", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80" }
+  ],
+  5: [
+    { author: "Niaz Morshed", date: "1 day ago", stars: 5, text: "The Sichuan Chili Chicken is insanely spicy and delicious! Portion size was very good.", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=80" },
+    { author: "Farhana Yasmin", date: "3 days ago", stars: 5, text: "Extremely delicious dumplings and Yangzhou fried rice. Tastes just like traditional Cantonese style.", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80" }
   ]
 };
 
@@ -155,7 +161,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
   const [cart, setCart] = useState<{ [key: number]: number }>({});
   const [isCartExpanded, setIsCartExpanded] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
-  const [actionToast, setActionToast] = useState<string | null>(null);
+  const [actionToast, setActionToast] = useState<{ text: string; subText: string; type: "success" | "error" | "info" } | null>(null);
   const [orders, setOrders] = useState<Array<{ id: string; items: any[]; time: string; status: string; total: number }>>([]);
   const [isCategoriesSticky, setIsCategoriesSticky] = useState(false);
   const [isMenuDropdownOpen, setIsMenuDropdownOpen] = useState(false);
@@ -179,10 +185,34 @@ export default function RestaurantMenuPage({ params }: PageProps) {
   }, [activeTab]);
 
   // Trigger Toast notifications
-  const triggerToast = (msg: string) => {
-    setActionToast(msg);
-    setTimeout(() => setActionToast(null), 3500);
+  const triggerToast = (msg: string, subText?: string, type?: "success" | "error" | "info") => {
+    const isError = msg.toLowerCase().includes("fail") || msg.toLowerCase().includes("error") || msg.toLowerCase().includes("invalid");
+    setActionToast({
+      text: msg,
+      subText: subText || (isError ? "Something went wrong" : "Success"),
+      type: type || (isError ? "error" : "success")
+    });
   };
+
+  // Trigger bubble explosion effect on the closest food card
+  const triggerBubbleEffect = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const card = e.currentTarget.closest('.food-card');
+    if (card) {
+      card.classList.remove("animate");
+      void (card as HTMLElement).offsetWidth;
+      card.classList.add("animate");
+      setTimeout(() => {
+        card.classList.remove("animate");
+      }, 600);
+    }
+  };
+
+  useEffect(() => {
+    if (actionToast) {
+      const timer = setTimeout(() => setActionToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [actionToast]);
 
   // Copy Profile Link Share
   const handleShareProfile = () => {
@@ -331,7 +361,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f0f2f5] flex flex-col font-sans antialiased pb-0 select-none text-neutral-800">
+    <div className="min-h-screen bg-[#f0f2f5] flex flex-col font-sans antialiased pb-0 select-none text-neutral-800 overflow-x-hidden w-full">
       {/* Sticky Header */}
 
 
@@ -342,7 +372,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
         <div className="w-full bg-[#f0f2f5] shadow-sm">
           <div className="max-w-6xl mx-auto relative">
             {/* Cover image wrap */}
-            <div className="relative w-full h-[126px] sm:h-[210px] md:h-[245px] overflow-hidden bg-neutral-200 md:rounded-b-xl">
+            <div className="relative w-full h-[180px] sm:h-[220px] md:h-[260px] overflow-hidden bg-neutral-200 md:rounded-b-xl">
               <Image
                 src={restaurant.image}
                 alt={restaurant.name}
@@ -351,7 +381,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                 sizes="100vw"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
             </div>
 
             {/* White info area overlapping cover photo */}
@@ -374,7 +404,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                   </div>
 
                   {/* Brand details */}
-                  <div className="flex flex-col pb-1 min-w-0 relative -top-1.5 sm:top-0 gap-1 text-left ml-1 sm:ml-0">
+                  <div className="flex flex-col pb-1 min-w-0 relative -top-6 sm:top-0 gap-1 text-left ml-1 sm:ml-0">
                     <h1 className="text-base sm:text-[20px] font-black text-neutral-900 tracking-tight leading-none flex items-center gap-1.5 min-w-0">
                       <span className="truncate">{restaurant.name}</span>
                       <svg 
@@ -606,27 +636,38 @@ export default function RestaurantMenuPage({ params }: PageProps) {
             {/* TAB CONTENT: Menu List */}
             {activeTab === "menu" && (
               <div className="flex flex-col gap-4 w-full">
+                {/* Mobile Service & Search Header Row */}
+                <div className="flex md:hidden items-center justify-between gap-2.5 mt-0 w-full relative z-20">
+                  {/* Call Waiter Quick Action Button */}
+                  <Button
+                    onClick={() => triggerToast(`Waiter requested! A staff member is on their way to Table #${tableNumber}.`)}
+                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-none rounded-br-xl -ml-4"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell-ring"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="M4 2C2.8 3.7 2 5.7 2 8"/><path d="M22 8c0-2.3-.8-4.3-2-6"/></svg>
+                    <span>Call Waiter</span>
+                  </Button>
 
-                {/* Mobile Search Bar */}
-                <div className="block md:hidden w-[65%] max-w-[240px] ml-auto -mr-4 relative z-20 mt-0">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-4 w-4 text-neutral-400" />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Search menu..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="block w-full pl-9 pr-8 py-2.5 text-xs font-semibold bg-white border border-neutral-200/80 rounded-tl-none rounded-bl-[14px] rounded-r-none focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white transition-all placeholder-neutral-400 shadow-sm"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral-400 hover:text-neutral-600 transition-colors"
-                    >
-                      <span className="text-sm font-bold">×</span>
-                    </button>
-                  )}
+                  {/* Mobile Search Bar */}
+                  <div className="w-[50%] max-w-[200px] -mr-4 relative">
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-neutral-400" />
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="Search menu..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="block w-full pl-9 pr-8 py-2.5 text-xs font-semibold bg-white border border-neutral-200/80 rounded-tl-none rounded-bl-[14px] rounded-r-none focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white transition-all placeholder-neutral-400 shadow-sm"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral-400 hover:text-neutral-600 transition-colors"
+                      >
+                        <span className="text-sm font-bold">×</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className={`flex flex-col gap-1.5 sticky top-0 md:relative md:top-auto z-30 bg-[#f0f2f5] transition-all duration-150 ${
@@ -679,7 +720,7 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                     {filteredItems.map((item) => {
                       const qtyInCart = cart[item.id] || 0;
                       return (
-                        <div key={item.id} className="flex flex-col h-full group">
+                        <div key={item.id} className="flex flex-col h-full group food-card btn-bubble">
                           {/* Card 1: Details Card (Image, Title, Description) */}
                           <div className="flex-grow flex flex-col bg-white rounded-t-2xl rounded-br-2xl border border-neutral-200/80 border-b-0 shadow-sm hover:shadow-[0_6px_20px_rgba(0,0,0,0.025)] transition-all duration-300">
                             {/* Food Photo Box */}
@@ -725,7 +766,10 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                               {qtyInCart > 0 ? (
                                 <div className="flex items-center gap-1.5 px-2.5">
                                   <button
-                                    onClick={() => removeFromCart(item.id)}
+                                    onClick={(e) => {
+                                      triggerBubbleEffect(e);
+                                      removeFromCart(item.id);
+                                    }}
                                     className="w-5 h-5 rounded-full bg-deep-emerald-900/10 hover:bg-deep-emerald-900/20 text-deep-emerald-950 flex items-center justify-center cursor-pointer transition-colors"
                                   >
                                     <Minus className="w-2.5 h-2.5" />
@@ -734,7 +778,10 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                                     {qtyInCart}
                                   </span>
                                   <button
-                                    onClick={() => addToCart(item.id)}
+                                    onClick={(e) => {
+                                      triggerBubbleEffect(e);
+                                      addToCart(item.id);
+                                    }}
                                     className="w-5 h-5 rounded-full bg-deep-emerald-950 text-white hover:bg-emerald-900 flex items-center justify-center cursor-pointer transition-all duration-200"
                                   >
                                     <Plus className="w-2.5 h-2.5" />
@@ -742,7 +789,10 @@ export default function RestaurantMenuPage({ params }: PageProps) {
                                 </div>
                               ) : (
                                 <button
-                                  onClick={() => addToCart(item.id)}
+                                  onClick={(e) => {
+                                    triggerBubbleEffect(e);
+                                    addToCart(item.id);
+                                  }}
                                   className="w-10 h-full flex items-center justify-center bg-transparent text-emerald-700 hover:text-deep-emerald-950 hover:scale-110 transition-all duration-200 cursor-pointer active:scale-95"
                                   title="Add to Cart"
                                 >
@@ -1066,9 +1116,13 @@ export default function RestaurantMenuPage({ params }: PageProps) {
 
       {/* Action Toast Notifications overlay */}
       {actionToast && (
-        <div className="fixed bottom-6 right-6 bg-deep-emerald-950 text-white border border-deep-emerald-800 px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300 z-50">
-          <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
-          <span className="text-[13.5px] font-bold font-sans">{actionToast}</span>
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <Toast 
+            text={actionToast.text}
+            subText={actionToast.subText}
+            type={actionToast.type}
+            onClose={() => setActionToast(null)}
+          />
         </div>
       )}
 
