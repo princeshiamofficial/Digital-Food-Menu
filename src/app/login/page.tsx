@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -13,10 +13,19 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   
   // Validation and feedback states
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [toastMessage, setToastMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  useEffect(() => {
+    if (localStorage.getItem("isLoggedIn") === "true") {
+      router.replace("/dashboard");
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [router]);
 
   const showToast = (text: string, type: "success" | "error" = "success") => {
     setToastMessage({ text, type });
@@ -50,16 +59,66 @@ export default function LoginPage() {
     // Simulate login request to an API
     setTimeout(() => {
       setIsLoading(false);
+
+      // Check default users
+      let matchedUser = null;
       if (email === "demo@example.com" && password === "password123") {
+        matchedUser = { email, role: "admin", name: "Color Hut Admin", assignedBranchId: "" };
+      } else if (email === "admin@example.com" && password === "password123") {
+        matchedUser = { email, role: "admin", name: "Color Hut Admin", assignedBranchId: "" };
+      } else if (email === "dhanmondi@example.com" && password === "password123") {
+        matchedUser = { email, role: "manager", name: "Dhanmondi Manager", assignedBranchId: "dhanmondi" };
+      } else if (email === "gulshan@example.com" && password === "password123") {
+        matchedUser = { email, role: "manager", name: "Gulshan Manager", assignedBranchId: "gulshan" };
+      } else if (email === "uttara@example.com" && password === "password123") {
+        matchedUser = { email, role: "manager", name: "Uttara Manager", assignedBranchId: "uttara" };
+      } else {
+        // Check dynamic staff stored in localStorage
+        try {
+          const storedStaffStr = localStorage.getItem("restaurant_staff");
+          if (storedStaffStr) {
+            const staffList = JSON.parse(storedStaffStr);
+            const found = staffList.find((s: any) => s.email.toLowerCase() === email.toLowerCase() && s.password === password);
+            if (found) {
+              matchedUser = {
+                email: found.email,
+                role: found.role === "Admin" ? "admin" : "manager",
+                name: found.name,
+                assignedBranchId: found.assignedBranchId || ""
+              };
+            }
+          }
+        } catch (err) {
+          console.error("Error reading stored staff:", err);
+        }
+      }
+
+      if (matchedUser) {
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userRole", matchedUser.role);
+        localStorage.setItem("userDisplayName", matchedUser.name);
+        localStorage.setItem("userAssignedBranchId", matchedUser.assignedBranchId);
+        
         showToast("Logged in successfully! Redirecting...", "success");
         setTimeout(() => {
           router.push("/dashboard");
         }, 1500);
       } else {
-        showToast("Invalid credentials. Try demo@example.com / password123", "error");
+        showToast("Invalid credentials. Try admin@example.com or dhanmondi@example.com with password123", "error");
       }
     }, 1800);
   };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-deep-emerald-950 flex flex-col items-center justify-center text-white font-sans">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-medium tracking-wide text-neutral-400">Loading your panel...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-deep-emerald-950 flex flex-col relative overflow-hidden text-neutral-100 font-sans selection:bg-emerald-800 selection:text-white">

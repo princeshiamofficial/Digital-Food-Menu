@@ -4,13 +4,15 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import { RESTAURANTS } from "../data/restaurants";
-import { 
-  Menu, 
-  Bell, 
-  Search, 
-  Star, 
-  Check, 
-  Utensils, 
+import { EmojiProvider, Emoji } from "react-apple-emojis";
+import emojiData from "react-apple-emojis/src/data.json";
+import {
+  Menu,
+  Bell,
+  Search,
+  Star,
+  Check,
+  Utensils,
   AlertCircle,
   Eye,
   EyeOff,
@@ -29,7 +31,103 @@ interface MenuItemWithState {
   category: string;
   popular: boolean;
   available: boolean;
+  emoji?: string;
 }
+
+const AVAILABLE_MENU_EMOJIS = [
+  // Fast Food & Mains
+  { name: "hamburger", label: "🍔" },
+  { name: "french-fries", label: "🍟" },
+  { name: "pizza", label: "🍕" },
+  { name: "spaghetti", label: "🍝" },
+  { name: "steaming-bowl", label: "🍜" },
+  { name: "sushi", label: "🍣" },
+  { name: "dumpling", label: "🥟" },
+  { name: "pot-of-food", label: "🍲" },
+  { name: "curry-rice", label: "🍛" },
+  { name: "taco", label: "🌮" },
+  { name: "burrito", label: "🌯" },
+  { name: "hot-dog", label: "🌭" },
+  { name: "sandwich", label: "🥪" },
+  { name: "poultry-leg", label: "🍗" },
+  { name: "meat-on-bone", label: "🍖" },
+  { name: "bacon", label: "🥓" },
+  { name: "fried-shrimp", label: "🍤" },
+  
+  // Drinks & Beverages
+  { name: "cup-with-straw", label: "🥤" },
+  { name: "bubble-tea", label: "🧋" },
+  { name: "hot-beverage", label: "☕" },
+  { name: "teapot", label: "🫖" },
+  { name: "beer-mug", label: "🍺" },
+  { name: "clinking-beer-mugs", label: "🍻" },
+  { name: "wine-glass", label: "🍷" },
+  { name: "cocktail-glass", label: "🍸" },
+  { name: "tropical-drink", label: "🍹" },
+  { name: "sake", label: "🍶" },
+  { name: "bottle-with-popping-cork", label: "🍾" },
+  { name: "glass-of-milk", label: "🥛" },
+
+  // Desserts & Breads
+  { name: "shortcake", label: "🍰" },
+  { name: "birthday-cake", label: "🎂" },
+  { name: "cupcake", label: "🧁" },
+  { name: "doughnut", label: "🍩" },
+  { name: "cookie", label: "🍪" },
+  { name: "ice-cream", label: "🍨" },
+  { name: "soft-ice-cream", label: "🍦" },
+  { name: "chocolate-bar", label: "🍫" },
+  { name: "candy", label: "🍬" },
+  { name: "lollipop", label: "🍭" },
+  { name: "honey-pot", label: "🍯" },
+  { name: "bread", label: "🍞" },
+  { name: "croissant", label: "🥐" },
+  { name: "baguette-bread", label: "🥖" },
+  { name: "bagel", label: "🥯" },
+  { name: "waffle", label: "🧇" },
+  { name: "pancakes", label: "🥞" },
+
+  // Fruits, Vegetables & Ingredients
+  { name: "green-salad", label: "🥗" },
+  { name: "cooking", label: "🍳" },
+  { name: "cheese-wedge", label: "🧀" },
+  { name: "tomato", label: "🍅" },
+  { name: "hot-pepper", label: "🌶️" },
+  { name: "avocado", label: "🥑" },
+  { name: "lemon", label: "🍋" },
+  { name: "watermelon", label: "🍉" },
+  { name: "strawberry", label: "🍓" },
+  { name: "grapes", label: "🍇" },
+  { name: "melon", label: "🍈" },
+  { name: "banana", label: "🍌" },
+  { name: "pineapple", label: "🍍" },
+  { name: "mango", label: "🥭" },
+  { name: "red-apple", label: "🍎" },
+  { name: "pear", label: "🍐" },
+  { name: "cherries", label: "🍒" },
+  { name: "broccoli", label: "🥦" },
+  { name: "garlic", label: "🧄" },
+  { name: "onion", label: "🧅" }
+];
+
+const getCategoryAppleEmojiName = (category: string): string => {
+  const map: Record<string, string> = {
+    all: "fork-and-knife-with-plate",
+    popular: "fire",
+    burgers: "hamburger",
+    sides: "french-fries",
+    beverages: "cup-with-straw",
+    pizza: "pizza",
+    pasta: "spaghetti",
+    desserts: "shortcake",
+    sushi: "sushi",
+    ramen: "steaming-bowl",
+    appetizers: "dumpling",
+    mains: "pot-of-food",
+    "rice & noodles": "curry-rice",
+  };
+  return map[category.trim().toLowerCase()] || "sparkles";
+};
 
 export default function MenuAvailabilityPage() {
   const router = useRouter();
@@ -51,6 +149,7 @@ export default function MenuAvailabilityPage() {
   const [menuCategory, setMenuCategory] = useState("Burgers");
   const [menuDescription, setMenuDescription] = useState("");
   const [menuImage, setMenuImage] = useState("");
+  const [menuEmoji, setMenuEmoji] = useState("hamburger");
 
   const handleLogout = () => {
     router.push("/login");
@@ -132,7 +231,8 @@ export default function MenuAvailabilityPage() {
       image: defaultImage,
       category: menuCategory,
       popular: false,
-      available: true
+      available: true,
+      emoji: menuEmoji
     };
 
     setItems(prev => [...prev, newItem]);
@@ -144,6 +244,7 @@ export default function MenuAvailabilityPage() {
     setMenuCategory("Burgers");
     setMenuDescription("");
     setMenuImage("");
+    setMenuEmoji("hamburger");
     setShowAddModal(false);
   };
 
@@ -154,6 +255,7 @@ export default function MenuAvailabilityPage() {
     setMenuCategory(item.category);
     setMenuDescription(item.description);
     setMenuImage(item.image);
+    setMenuEmoji(item.emoji || "hamburger");
     setShowEditModal(true);
   };
 
@@ -169,7 +271,8 @@ export default function MenuAvailabilityPage() {
           price: menuPrice,
           category: menuCategory,
           description: menuDescription,
-          image: menuImage
+          image: menuImage,
+          emoji: menuEmoji
         };
       }
       return x;
@@ -178,6 +281,7 @@ export default function MenuAvailabilityPage() {
     triggerToast(`Updated "${menuName}" details.`);
     setShowEditModal(false);
     setEditingItem(null);
+    setMenuEmoji("hamburger");
   };
 
   const handleDeleteItem = (itemId: number) => {
@@ -191,455 +295,500 @@ export default function MenuAvailabilityPage() {
 
   const filteredItems = items.filter(item => {
     const matchCategory = selectedCategory === "All" || item.category === selectedCategory;
-    const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                        item.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCategory && matchSearch;
   });
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex text-slate-800 font-sans overflow-hidden">
-      
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex h-screen shrink-0">
-        <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          ordersCount={0}
-          handleLogout={handleLogout}
-          isCollapsed={isCollapsed}
-          onToggleSidebar={() => setIsCollapsed(!isCollapsed)}
-        />
-      </div>
+    <EmojiProvider data={emojiData}>
+      <div className="min-h-screen bg-[#f8fafc] flex text-slate-800 font-sans overflow-hidden">
 
-      {/* Mobile Sidebar overlay */}
-      {isMobileOpen && (
-        <div className="fixed inset-0 z-40 flex lg:hidden bg-black/60 backdrop-blur-sm transition-opacity duration-300">
-          <div className="relative animate-in slide-in-from-left duration-200">
-            <Sidebar
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              ordersCount={0}
-              handleLogout={handleLogout}
-              isMobile={true}
-              isCollapsed={false}
-              onCloseMobile={() => setIsMobileOpen(false)}
-            />
-          </div>
-          <button 
-            onClick={() => setIsMobileOpen(false)}
-            className="flex-1 h-full cursor-default focus:outline-none"
-            aria-label="Close menu"
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:flex h-screen shrink-0">
+          <Sidebar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            ordersCount={0}
+            handleLogout={handleLogout}
+            isCollapsed={isCollapsed}
+            onToggleSidebar={() => setIsCollapsed(!isCollapsed)}
           />
         </div>
-      )}
 
-      {/* Main Panel */}
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto">
-        
-        {/* Top Navbar */}
-        <header className="h-16 border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-10 shrink-0">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setIsMobileOpen(true)}
-              className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-650 transition-colors"
-              aria-label="Open sidebar"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <h1 className="text-[17px] font-semibold tracking-wide text-slate-800">Menu Settings</h1>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <button className="p-2 rounded-lg hover:bg-slate-100 text-slate-550 hover:text-slate-850 transition-colors relative">
-                <Bell className="w-[18px] h-[18px]" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#ff7a00] ring-2 ring-white" />
-              </button>
+        {/* Mobile Sidebar overlay */}
+        {isMobileOpen && (
+          <div className="fixed inset-0 z-40 flex lg:hidden bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+            <div className="relative animate-in slide-in-from-left duration-200">
+              <Sidebar
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                ordersCount={0}
+                handleLogout={handleLogout}
+                isMobile={true}
+                isCollapsed={false}
+                onCloseMobile={() => setIsMobileOpen(false)}
+              />
             </div>
-            <div className="h-8 w-[1px] bg-slate-205" />
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#ff7a00] to-amber-500 flex items-center justify-center font-bold text-xs text-white">
-                CH
-              </div>
-              <span className="hidden md:inline text-xs font-semibold text-slate-600">Color Hut Admin</span>
-            </div>
-          </div>
-        </header>
-
-        {/* Floating Toast Notification */}
-        {showToast && (
-          <div className="fixed top-20 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl border border-emerald-500/35 bg-emerald-955/90 text-emerald-300 shadow-2xl backdrop-blur-md animate-in slide-in-from-top-4 duration-300">
-            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span className="text-xs font-semibold">{showToast}</span>
+            <button
+              onClick={() => setIsMobileOpen(false)}
+              className="flex-1 h-full cursor-default focus:outline-none"
+              aria-label="Close menu"
+            />
           </div>
         )}
 
-        {/* Content Body */}
-        <main className="p-6 w-full flex-1 flex flex-col gap-6">
+        {/* Main Panel */}
+        <div className="flex-1 flex flex-col h-screen overflow-y-auto">
 
-          {/* Controls Bar */}
-          <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
-            {/* Category tabs list */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 md:pb-0 scrollbar-none">
-              {categories.map((cat, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                    selectedCategory === cat 
-                      ? "bg-[#ff7a00] text-white shadow-sm"
-                      : "text-slate-550 hover:text-slate-850 bg-white border border-slate-200 hover:bg-slate-100"
-                  }`}
-                >
-                  {cat}
+          {/* Top Navbar */}
+          <header className="h-16 border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-10 shrink-0">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsMobileOpen(true)}
+                className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-650 transition-colors"
+                aria-label="Open sidebar"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <h1 className="text-[17px] font-semibold tracking-wide text-slate-800">Menu Settings</h1>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <button className="p-2 rounded-lg hover:bg-slate-100 text-slate-550 hover:text-slate-850 transition-colors relative">
+                  <Bell className="w-[18px] h-[18px]" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#ff7a00] ring-2 ring-white" />
                 </button>
+              </div>
+              <div className="h-8 w-[1px] bg-slate-205" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#ff7a00] to-amber-500 flex items-center justify-center font-bold text-xs text-white">
+                  CH
+                </div>
+                <span className="hidden md:inline text-xs font-semibold text-slate-600">Color Hut Admin</span>
+              </div>
+            </div>
+          </header>
+
+          {/* Floating Toast Notification */}
+          {showToast && (
+            <div className="fixed top-20 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl border border-emerald-500/35 bg-emerald-955/90 text-emerald-300 shadow-2xl backdrop-blur-md animate-in slide-in-from-top-4 duration-300">
+              <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="text-xs font-semibold">{showToast}</span>
+            </div>
+          )}
+
+          {/* Content Body */}
+          <main className="p-6 w-full flex-1 flex flex-col gap-6">
+
+            {/* Controls Bar */}
+            <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+              {/* Category tabs list */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 md:pb-0 scrollbar-none">
+                {categories.map((cat, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${selectedCategory === cat
+                        ? "bg-[#ff7a00] text-white shadow-sm"
+                        : "text-slate-550 hover:text-slate-850 bg-white border border-slate-200 hover:bg-slate-100"
+                      }`}
+                  >
+                    <span className="w-4 h-4 flex items-center justify-center">
+                      <Emoji name={getCategoryAppleEmojiName(cat)} className="w-full h-full object-contain" />
+                    </span>
+                    <span>{cat}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Search and Add controls */}
+              <div className="flex gap-2 items-center shrink-0">
+                <button
+                  onClick={() => {
+                    setMenuName("");
+                    setMenuPrice(0);
+                    setMenuCategory("Burgers");
+                    setMenuDescription("");
+                    setMenuImage("");
+                    setShowAddModal(true);
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shrink-0"
+                >
+                  <Plus className="w-4 h-4" /> Add Menu Item
+                </button>
+
+                <div className="relative max-w-xs w-full">
+                  <Search className="w-4 h-4 text-slate-505 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search dishes..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full text-xs pl-9 pr-4 py-2.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-[#ff7a00]/70 text-slate-900 placeholder-slate-400 shadow-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Grid of Dishes */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {filteredItems.map(item => (
+                <div
+                  key={item.id}
+                  className={`bg-white border rounded-2xl p-4 flex gap-4 transition-all duration-200 shadow-sm ${item.available
+                      ? "border-slate-200 hover:border-slate-300"
+                      : "border-slate-200 bg-slate-50 opacity-70"
+                    }`}
+                >
+                  {/* Product Image */}
+                  <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200 flex items-center justify-center">
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Utensils className="w-6 h-6 text-slate-400" />
+                    )}
+
+                    {/* Status overlay when Sold out */}
+                    {!item.available && (
+                      <div className="absolute inset-0 bg-black/65 flex items-center justify-center">
+                        <span className="text-[9px] font-black text-rose-400 bg-rose-950/80 px-2 py-0.5 rounded border border-rose-500/25 tracking-wide uppercase">
+                          Sold Out
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Details */}
+                  <div className="flex-1 flex flex-col gap-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <h3 className={`text-xs font-bold truncate ${item.available ? "text-slate-800" : "text-slate-500"}`} title={item.name}>
+                          {item.name}
+                        </h3>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-xs font-bold text-[#ff7a00]">${item.price.toFixed(2)}</span>
+
+                        <button
+                          onClick={() => handleStartEdit(item)}
+                          className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                          title="Edit Item"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          onClick={() => handleDeleteItem(item.id)}
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                          title="Delete Item"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">
+                      {item.description}
+                    </p>
+
+                    <div className="mt-auto pt-2.5 flex items-center justify-between border-t border-slate-100">
+                      {/* Toggle switch for Available / Sold out */}
+                      <button
+                        onClick={() => toggleAvailability(item.id)}
+                        className="flex items-center gap-1.5 group select-none text-[10px] font-bold"
+                      >
+                        <div className={`w-8 h-4.5 rounded-full p-0.5 transition-colors flex ${item.available ? "bg-emerald-500 justify-end" : "bg-slate-350 justify-start"
+                          }`}>
+                          <div className="w-3.5 h-3.5 rounded-full bg-white shadow" />
+                        </div>
+                        <span className={item.available ? "text-emerald-600" : "text-slate-500"}>
+                          {item.available ? "Available" : "Sold Out"}
+                        </span>
+                      </button>
+
+                      {/* Star highlight tag */}
+                      <button
+                        onClick={() => item.available && togglePopular(item.id)}
+                        disabled={!item.available}
+                        className={`flex items-center gap-1 text-[10px] font-bold py-1 px-2 rounded-lg border transition-colors ${item.popular
+                            ? "bg-amber-50 border-amber-200 text-amber-600"
+                            : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800"
+                          } disabled:opacity-40 disabled:cursor-not-allowed`}
+                      >
+                        <Star className={`w-3 h-3 ${item.popular ? "fill-amber-400" : ""}`} />
+                        <span>Popular</span>
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
               ))}
             </div>
-
-            {/* Search and Add controls */}
-            <div className="flex gap-2 items-center shrink-0">
-              <button
-                onClick={() => {
-                  setMenuName("");
-                  setMenuPrice(0);
-                  setMenuCategory("Burgers");
-                  setMenuDescription("");
-                  setMenuImage("");
-                  setShowAddModal(true);
-                }}
-                className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shrink-0"
-              >
-                <Plus className="w-4 h-4" /> Add Menu Item
-              </button>
-
-              <div className="relative max-w-xs w-full">
-                <Search className="w-4 h-4 text-slate-505 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search dishes..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full text-xs pl-9 pr-4 py-2.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-[#ff7a00]/70 text-slate-900 placeholder-slate-400 shadow-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Grid of Dishes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filteredItems.map(item => (
-              <div 
-                key={item.id} 
-                className={`bg-white border rounded-2xl p-4 flex gap-4 transition-all duration-200 shadow-sm ${
-                  item.available 
-                    ? "border-slate-200 hover:border-slate-300" 
-                    : "border-slate-200 bg-slate-50 opacity-70"
-                }`}
-              >
-                {/* Product Image */}
-                <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200 flex items-center justify-center">
-                  {item.image ? (
-                    <img 
-                      src={item.image} 
-                      alt={item.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Utensils className="w-6 h-6 text-slate-400" />
-                  )}
-                  
-                  {/* Status overlay when Sold out */}
-                  {!item.available && (
-                    <div className="absolute inset-0 bg-black/65 flex items-center justify-center">
-                      <span className="text-[9px] font-black text-rose-400 bg-rose-950/80 px-2 py-0.5 rounded border border-rose-500/25 tracking-wide uppercase">
-                        Sold Out
-                      </span>
+            {/* Add Menu Item Modal */}
+            {showAddModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+                <form onSubmit={handleAddItem} className="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full flex flex-col gap-4 text-left shadow-2xl animate-in zoom-in-95 duration-200">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900">Add New Menu Item</h3>
+                      <p className="text-xs text-slate-500">Add a new dish to your digital menu</p>
                     </div>
-                  )}
-                </div>
-
-                {/* Details */}
-                <div className="flex-1 flex flex-col gap-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <h3 className={`text-xs font-bold truncate ${item.available ? "text-slate-800" : "text-slate-500"}`} title={item.name}>
-                        {item.name}
-                      </h3>
-                    </div>
-                    
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-xs font-bold text-[#ff7a00]">${item.price.toFixed(2)}</span>
-                      
-                      <button
-                        onClick={() => handleStartEdit(item)}
-                        className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                        title="Edit Item"
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                      </button>
-
-                      <button
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                        title="Delete Item"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">
-                    {item.description}
-                  </p>
-
-                  <div className="mt-auto pt-2.5 flex items-center justify-between border-t border-slate-100">
-                    {/* Toggle switch for Available / Sold out */}
                     <button
-                      onClick={() => toggleAvailability(item.id)}
-                      className="flex items-center gap-1.5 group select-none text-[10px] font-bold"
+                      type="button"
+                      onClick={() => setShowAddModal(false)}
+                      className="p-1 rounded hover:bg-slate-100 text-slate-400 animate-click"
                     >
-                      <div className={`w-8 h-4.5 rounded-full p-0.5 transition-colors flex ${
-                        item.available ? "bg-emerald-500 justify-end" : "bg-slate-350 justify-start"
-                      }`}>
-                        <div className="w-3.5 h-3.5 rounded-full bg-white shadow" />
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-3 py-1">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-bold text-slate-500">Dish Name</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Classic Margherita Pizza"
+                        value={menuName}
+                        onChange={(e) => setMenuName(e.target.value)}
+                        className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-bold text-slate-500">Dish Emoji Icon</label>
+                      <div className="flex gap-1.5 flex-wrap p-2.5 rounded-xl bg-slate-50 border border-slate-200 max-h-[105px] overflow-y-auto scrollbar-none">
+                        {AVAILABLE_MENU_EMOJIS.map((item) => (
+                          <button
+                            key={item.name}
+                            type="button"
+                            onClick={() => setMenuEmoji(item.name)}
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
+                              menuEmoji === item.name 
+                                ? "border-[#ff7a00] bg-orange-50/50 shadow-sm scale-110" 
+                                : "border-slate-200/60 bg-white hover:border-slate-350 hover:bg-slate-50"
+                            }`}
+                          >
+                            <span className="w-5 h-5 flex items-center justify-center">
+                              <Emoji name={item.name} className="w-full h-full object-contain" />
+                            </span>
+                          </button>
+                        ))}
                       </div>
-                      <span className={item.available ? "text-emerald-600" : "text-slate-500"}>
-                        {item.available ? "Available" : "Sold Out"}
-                      </span>
-                    </button>
+                    </div>
 
-                    {/* Star highlight tag */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-bold text-slate-500">Category</label>
+                        <select
+                          value={menuCategory}
+                          onChange={(e) => setMenuCategory(e.target.value)}
+                          className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-bold"
+                        >
+                          {categories.filter(c => c !== "All").map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-bold text-slate-500">Price ($)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          required
+                          value={menuPrice || ""}
+                          onChange={(e) => setMenuPrice(Math.max(0, parseFloat(e.target.value) || 0))}
+                          placeholder="0.00"
+                          className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-[#ff7a00] font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-bold text-slate-500">Image URL</label>
+                      <input
+                        type="text"
+                        placeholder="Leave empty for default food image"
+                        value={menuImage}
+                        onChange={(e) => setMenuImage(e.target.value)}
+                        className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium font-mono"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-bold text-slate-500">Description</label>
+                      <textarea
+                        placeholder="Describe the dish ingredients, taste, etc."
+                        value={menuDescription}
+                        onChange={(e) => setMenuDescription(e.target.value)}
+                        rows={3}
+                        className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-550 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-2 border-t border-slate-100">
                     <button
-                      onClick={() => item.available && togglePopular(item.id)}
-                      disabled={!item.available}
-                      className={`flex items-center gap-1 text-[10px] font-bold py-1 px-2 rounded-lg border transition-colors ${
-                        item.popular
-                          ? "bg-amber-50 border-amber-200 text-amber-600"
-                          : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800"
-                      } disabled:opacity-40 disabled:cursor-not-allowed`}
+                      type="button"
+                      onClick={() => setShowAddModal(false)}
+                      className="flex-1 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs text-slate-650 font-bold transition-all"
                     >
-                      <Star className={`w-3 h-3 ${item.popular ? "fill-amber-400" : ""}`} />
-                      <span>Popular</span>
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition-all shadow-md shadow-emerald-500/10"
+                    >
+                      Add Dish
                     </button>
                   </div>
-                </div>
-
+                </form>
               </div>
-            ))}
-          </div>
-      {/* Add Menu Item Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <form onSubmit={handleAddItem} className="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full flex flex-col gap-4 text-left shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="text-sm font-black text-slate-900">Add New Menu Item</h3>
-                <p className="text-xs text-slate-500">Add a new dish to your digital menu</p>
+            )}
+
+            {/* Edit Menu Item Modal */}
+            {showEditModal && editingItem && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+                <form onSubmit={handleEditItem} className="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full flex flex-col gap-4 text-left shadow-2xl animate-in zoom-in-95 duration-200">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900">Edit Menu Item</h3>
+                      <p className="text-xs text-slate-500">Update dish details in the digital menu</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowEditModal(false);
+                        setEditingItem(null);
+                      }}
+                      className="p-1 rounded hover:bg-slate-100 text-slate-400"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-3 py-1">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-bold text-slate-500">Dish Name</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Classic Margherita Pizza"
+                        value={menuName}
+                        onChange={(e) => setMenuName(e.target.value)}
+                        className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-bold text-slate-500">Dish Emoji Icon</label>
+                      <div className="flex gap-1.5 flex-wrap p-2.5 rounded-xl bg-slate-50 border border-slate-200 max-h-[105px] overflow-y-auto scrollbar-none">
+                        {AVAILABLE_MENU_EMOJIS.map((item) => (
+                          <button
+                            key={item.name}
+                            type="button"
+                            onClick={() => setMenuEmoji(item.name)}
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
+                              menuEmoji === item.name 
+                                ? "border-[#ff7a00] bg-orange-50/50 shadow-sm scale-110" 
+                                : "border-slate-200/60 bg-white hover:border-slate-350 hover:bg-slate-50"
+                            }`}
+                          >
+                            <span className="w-5 h-5 flex items-center justify-center">
+                              <Emoji name={item.name} className="w-full h-full object-contain" />
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-bold text-slate-500">Category</label>
+                        <select
+                          value={menuCategory}
+                          onChange={(e) => setMenuCategory(e.target.value)}
+                          className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-bold"
+                        >
+                          {categories.filter(c => c !== "All").map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase font-bold text-slate-500">Price ($)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          required
+                          value={menuPrice || ""}
+                          onChange={(e) => setMenuPrice(Math.max(0, parseFloat(e.target.value) || 0))}
+                          placeholder="0.00"
+                          className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-[#ff7a00] font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-bold text-slate-500">Image URL</label>
+                      <input
+                        type="text"
+                        placeholder="Image link URL"
+                        value={menuImage}
+                        onChange={(e) => setMenuImage(e.target.value)}
+                        className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium font-mono"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] uppercase font-bold text-slate-500">Description</label>
+                      <textarea
+                        placeholder="Describe the dish ingredients, taste, etc."
+                        value={menuDescription}
+                        onChange={(e) => setMenuDescription(e.target.value)}
+                        rows={3}
+                        className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowEditModal(false);
+                        setEditingItem(null);
+                      }}
+                      className="flex-1 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs text-slate-650 font-bold transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition-all shadow-md shadow-emerald-500/10"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
               </div>
-              <button 
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="p-1 rounded hover:bg-slate-100 text-slate-400 animate-click"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            )}
 
-            <div className="flex flex-col gap-3 py-1">
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] uppercase font-bold text-slate-500">Dish Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Classic Margherita Pizza"
-                  value={menuName}
-                  onChange={(e) => setMenuName(e.target.value)}
-                  className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-500">Category</label>
-                  <select
-                    value={menuCategory}
-                    onChange={(e) => setMenuCategory(e.target.value)}
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-bold"
-                  >
-                    {categories.filter(c => c !== "All").map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-500">Price ($)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    required
-                    value={menuPrice || ""}
-                    onChange={(e) => setMenuPrice(Math.max(0, parseFloat(e.target.value) || 0))}
-                    placeholder="0.00"
-                    className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-[#ff7a00] font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] uppercase font-bold text-slate-500">Image URL</label>
-                <input
-                  type="text"
-                  placeholder="Leave empty for default food image"
-                  value={menuImage}
-                  onChange={(e) => setMenuImage(e.target.value)}
-                  className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium font-mono"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] uppercase font-bold text-slate-500">Description</label>
-                <textarea
-                  placeholder="Describe the dish ingredients, taste, etc."
-                  value={menuDescription}
-                  onChange={(e) => setMenuDescription(e.target.value)}
-                  rows={3}
-                  className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-550 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium resize-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs text-slate-650 font-bold transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition-all shadow-md shadow-emerald-500/10"
-              >
-                Add Dish
-              </button>
-            </div>
-          </form>
+          </main>
         </div>
-      )}
 
-      {/* Edit Menu Item Modal */}
-      {showEditModal && editingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <form onSubmit={handleEditItem} className="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full flex flex-col gap-4 text-left shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="text-sm font-black text-slate-900">Edit Menu Item</h3>
-                <p className="text-xs text-slate-500">Update dish details in the digital menu</p>
-              </div>
-              <button 
-                type="button"
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingItem(null);
-                }}
-                className="p-1 rounded hover:bg-slate-100 text-slate-400"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-3 py-1">
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] uppercase font-bold text-slate-500">Dish Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Classic Margherita Pizza"
-                  value={menuName}
-                  onChange={(e) => setMenuName(e.target.value)}
-                  className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-500">Category</label>
-                  <select
-                    value={menuCategory}
-                    onChange={(e) => setMenuCategory(e.target.value)}
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-bold"
-                  >
-                    {categories.filter(c => c !== "All").map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-500">Price ($)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    required
-                    value={menuPrice || ""}
-                    onChange={(e) => setMenuPrice(Math.max(0, parseFloat(e.target.value) || 0))}
-                    placeholder="0.00"
-                    className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-[#ff7a00] font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] uppercase font-bold text-slate-500">Image URL</label>
-                <input
-                  type="text"
-                  placeholder="Image link URL"
-                  value={menuImage}
-                  onChange={(e) => setMenuImage(e.target.value)}
-                  className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium font-mono"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] uppercase font-bold text-slate-500">Description</label>
-                <textarea
-                  placeholder="Describe the dish ingredients, taste, etc."
-                  value={menuDescription}
-                  onChange={(e) => setMenuDescription(e.target.value)}
-                  rows={3}
-                  className="w-full text-xs px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-[#ff7a00] text-slate-800 font-medium resize-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingItem(null);
-                }}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs text-slate-650 font-bold transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition-all shadow-md shadow-emerald-500/10"
-              >
-                Save Changes
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-        </main>
       </div>
-
-    </div>
+    </EmojiProvider>
   );
 }

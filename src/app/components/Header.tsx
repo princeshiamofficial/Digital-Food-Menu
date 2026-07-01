@@ -42,7 +42,7 @@ export default function Header() {
 
         {/* Center Navigation Links (Identical to image: no dot active indicator, pure bold white text) */}
         <nav className="hidden md:flex items-center gap-10">
-          <a
+          <Link
             href="/"
             className={`text-[14px] transition-colors ${
               isHomeActive
@@ -51,8 +51,8 @@ export default function Header() {
             }`}
           >
             Home
-          </a>
-          <a
+          </Link>
+          <Link
             href="/restaurants"
             className={`text-[14px] transition-colors ${
               isRestaurantActive
@@ -61,7 +61,7 @@ export default function Header() {
             }`}
           >
             Restaurant
-          </a>
+          </Link>
           <a
             href="#"
             className="text-[14px] font-medium text-neutral-400 hover:text-white transition-colors duration-200"
@@ -158,7 +158,7 @@ export default function Header() {
             </div>
 
             <nav className="flex flex-col gap-4">
-              <a
+              <Link
                 href="/"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`text-[15px] transition-colors py-1 ${
@@ -166,8 +166,8 @@ export default function Header() {
                 }`}
               >
                 Home
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/restaurants"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`text-[15px] transition-colors py-1 ${
@@ -175,7 +175,7 @@ export default function Header() {
                 }`}
               >
                 Restaurant
-              </a>
+              </Link>
               <a
                 href="#"
                 onClick={() => setIsMobileMenuOpen(false)}

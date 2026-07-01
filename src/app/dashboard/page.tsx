@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
+import StatsCard from "../../../ui/StatsCard";
+import DateRangePicker from "../../../ui/DateRangePicker";
+import { RESTAURANTS } from "../data/restaurants";
 import { 
   TrendingUp, 
   Users, 
@@ -13,7 +16,11 @@ import {
   Bell, 
   ArrowUpRight, 
   Plus, 
-  UtensilsCrossed 
+  UtensilsCrossed,
+  Hand,
+  ChevronDown,
+  CalendarDays,
+  Store
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -21,37 +28,177 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [selectedRange, setSelectedRange] = useState("Last 30 Days");
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+
+  // Dynamic user roles and branch states
+  const [userRole, setUserRole] = useState("admin");
+  const [userDisplayName, setUserDisplayName] = useState("Color Hut Admin");
+  const [userAssignedBranchId, setUserAssignedBranchId] = useState("");
+  const [selectedBranchId, setSelectedBranchId] = useState("all");
+  const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
+  const [allBranches, setAllBranches] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (isLoggedIn !== "true") {
+        router.replace("/login");
+        return;
+      }
+      
+      const role = localStorage.getItem("userRole") || "admin";
+      const name = localStorage.getItem("userDisplayName") || "Color Hut Admin";
+      const branchId = localStorage.getItem("userAssignedBranchId") || "";
+      
+      setUserRole(role);
+      setUserDisplayName(name);
+      setUserAssignedBranchId(branchId);
+      
+      if (role === "manager" && branchId) {
+        setSelectedBranchId(branchId);
+      }
+    }
+  }, [router]);
+
+  // Load default branches + dynamically added branches from Settings
+  useEffect(() => {
+    const restaurant = RESTAURANTS.find(r => r.id === 1);
+    const defaults = restaurant?.branches || [];
+    try {
+      const storedBranchesStr = localStorage.getItem("restaurant_branches");
+      if (storedBranchesStr) {
+        const customs = JSON.parse(storedBranchesStr);
+        setAllBranches([...defaults, ...customs]);
+      } else {
+        setAllBranches(defaults);
+      }
+    } catch (e) {
+      setAllBranches(defaults);
+    }
+  }, []);
+
+  const [liveRecentOrders, setLiveRecentOrders] = useState<any[]>([]);
+
+  useEffect(() => {
+    try {
+      const storedOrdersStr = localStorage.getItem("live_orders");
+      if (storedOrdersStr) {
+        const liveOrders = JSON.parse(storedOrdersStr);
+        const mappedLive = liveOrders.map((l: any) => ({
+          id: l.id,
+          table: l.table,
+          items: l.items.map((i: any) => `${i.quantity}x ${i.name}`).join(", "),
+          total: `$${l.items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0).toFixed(2)}`,
+          status: l.status.charAt(0).toUpperCase() + l.status.slice(1),
+          time: "Just now",
+          branchId: l.branchId,
+          branchName: l.branchName
+        }));
+        setLiveRecentOrders(mappedLive);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const displayNameTwoWords = userDisplayName.split(" ").slice(0, 2).join(" ");
 
   const handleLogout = () => {
     router.push("/login");
   };
 
   // Mock Dashboard Stats Data
-  const stats = [
-    { label: "Total Revenue", value: "$4,850.50", change: "+14.2%", isPositive: true, icon: DollarSign, color: "text-emerald-600 bg-emerald-50" },
-    { label: "Active Orders", value: "18", change: "+6 new", isPositive: true, icon: ShoppingBag, color: "text-amber-600 bg-amber-50" },
-    { label: "Table Occupancy", value: "12 / 16", change: "75%", isPositive: true, icon: Users, color: "text-blue-600 bg-blue-50" },
-    { label: "Average Bill", value: "$38.20", change: "-2.4%", isPositive: false, icon: TrendingUp, color: "text-rose-600 bg-rose-50" },
-  ];
+  const getBranchStats = () => {
+    const dataMap: Record<string, { revenue: string; activeOrders: string; occupancy: string; avgBill: string }> = {
+      all: { revenue: "$4,850.50", activeOrders: "18", occupancy: "11 / 15", avgBill: "$38.20" },
+      dhanmondi: { revenue: "$2,450.00", activeOrders: "8", occupancy: "6 / 8", avgBill: "$35.50" },
+      gulshan: { revenue: "$1,680.50", activeOrders: "6", occupancy: "3 / 4", avgBill: "$42.00" },
+      uttara: { revenue: "$720.00", activeOrders: "4", occupancy: "2 / 3", avgBill: "$32.00" },
+    };
+
+    // Calculate a default if we dynamically added a branch in Settings
+    const activeData = dataMap[selectedBranchId] || {
+      revenue: "$150.00",
+      activeOrders: "1",
+      occupancy: "1 / 5",
+      avgBill: "$25.00"
+    };
+
+    return [
+      { 
+        label: "Total Revenue", 
+        value: activeData.revenue, 
+        icon: DollarSign, 
+        iconColorClass: "text-[#10B981]", 
+        iconBgClass: "bg-[#E6F4EA]" 
+      },
+      { 
+        label: "Active Orders", 
+        value: activeData.activeOrders, 
+        icon: ShoppingBag, 
+        iconColorClass: "text-[#EA580C]", 
+        iconBgClass: "bg-[#FFF3D2]" 
+      },
+      { 
+        label: "Table Occupancy", 
+        value: activeData.occupancy, 
+        icon: Users, 
+        iconColorClass: "text-[#1A73E8]", 
+        iconBgClass: "bg-[#E8F0FE]" 
+      },
+      { 
+        label: "Average Bill", 
+        value: activeData.avgBill, 
+        icon: TrendingUp, 
+        iconColorClass: "text-[#E11D48]", 
+        iconBgClass: "bg-[#FCE8E6]" 
+      },
+    ];
+  };
+
+  const stats = getBranchStats();
 
   // Mock Chart Data (Days and heights in %)
-  const weeklyRevenue = [
-    { day: "Mon", amount: "$520", height: "45%" },
-    { day: "Tue", amount: "$680", height: "60%" },
-    { day: "Wed", amount: "$840", height: "75%" },
-    { day: "Thu", amount: "$710", height: "65%" },
-    { day: "Fri", amount: "$1,120", height: "95%" },
-    { day: "Sat", amount: "$1,250", height: "100%" },
-    { day: "Sun", amount: "$980", height: "85%" },
-  ];
+  const getWeeklyRevenue = () => {
+    const base = [
+      { day: "Mon", amount: "$520", height: "45%" },
+      { day: "Tue", amount: "$680", height: "60%" },
+      { day: "Wed", amount: "$840", height: "75%" },
+      { day: "Thu", amount: "$710", height: "65%" },
+      { day: "Fri", amount: "$1,120", height: "95%" },
+      { day: "Sat", amount: "$1,250", height: "100%" },
+      { day: "Sun", amount: "$980", height: "85%" },
+    ];
+    if (selectedBranchId === "dhanmondi") {
+      return base.map(b => ({ ...b, amount: `$${Math.round(parseInt(b.amount.replace('$', '').replace(',', '')) * 0.51)}`, height: `${Math.round(parseInt(b.height) * 0.51)}%` }));
+    }
+    if (selectedBranchId === "gulshan") {
+      return base.map(b => ({ ...b, amount: `$${Math.round(parseInt(b.amount.replace('$', '').replace(',', '')) * 0.35)}`, height: `${Math.round(parseInt(b.height) * 0.35)}%` }));
+    }
+    if (selectedBranchId === "uttara") {
+      return base.map(b => ({ ...b, amount: `$${Math.round(parseInt(b.amount.replace('$', '').replace(',', '')) * 0.15)}`, height: `${Math.round(parseInt(b.height) * 0.15)}%` }));
+    }
+    if (selectedBranchId !== "all") {
+      // Dynamic branch fallback
+      return base.map(b => ({ ...b, amount: `$${Math.round(parseInt(b.amount.replace('$', '').replace(',', '')) * 0.05)}`, height: `${Math.round(parseInt(b.height) * 0.05)}%` }));
+    }
+    return base;
+  };
+
+  const weeklyRevenue = getWeeklyRevenue();
 
   // Mock Recent Orders
-  const recentOrders = [
-    { id: "ORD-8821", table: "04", items: "2x Classic Burger, 1x Truffle Fries", total: "$27.00", status: "Preparing", time: "5 min ago" },
-    { id: "ORD-8820", table: "12", items: "1x Truffle Mushroom Pizza, 1x Mint Lemonade", total: "$21.50", status: "Pending", time: "8 min ago" },
-    { id: "ORD-8819", table: "08", items: "1x Dragon Roll, 1x Sichuan Wontons", total: "$33.50", status: "Served", time: "15 min ago" },
-    { id: "ORD-8818", table: "02", items: "3x Carbonara Pasta, 3x Soft Drinks", total: "$62.00", status: "Paid", time: "22 min ago" },
+  const rawRecentOrders = [
+    { id: "ORD-8821", table: "04", items: "2x Classic Burger, 1x Truffle Fries", total: "$27.00", status: "Preparing", time: "5 min ago", branchId: "dhanmondi", branchName: "Dhanmondi" },
+    { id: "ORD-8820", table: "02", items: "1x Truffle Mushroom Pizza, 1x Mint Lemonade", total: "$21.50", status: "Pending", time: "8 min ago", branchId: "gulshan", branchName: "Gulshan" },
+    { id: "ORD-8819", table: "08", items: "1x Dragon Roll, 1x Sichuan Wontons", total: "$33.50", status: "Served", time: "15 min ago", branchId: "uttara", branchName: "Uttara" },
+    { id: "ORD-8818", table: "02", items: "3x Carbonara Pasta, 3x Soft Drinks", total: "$62.00", status: "Paid", time: "22 min ago", branchId: "dhanmondi", branchName: "Dhanmondi" },
   ];
+
+  const recentOrders = selectedBranchId === "all"
+    ? [...liveRecentOrders, ...rawRecentOrders]
+    : [...liveRecentOrders, ...rawRecentOrders].filter(o => o.branchId === selectedBranchId);
 
   // Mock Popular Items
   const popularItems = [
@@ -60,6 +207,12 @@ export default function DashboardPage() {
     { name: "Dragon Sushi Roll Platter", orders: 96, revenue: "$2,160", rating: 5.0 },
     { name: "Truffle Parmesan Fries", orders: 84, revenue: "$420", rating: 4.7 },
   ];
+
+  const getSelectedBranchName = () => {
+    if (selectedBranchId === "all") return "All Branches";
+    const found = allBranches.find(b => b.id === selectedBranchId);
+    return found ? found.name : "Branch";
+  };
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex text-slate-800 font-sans overflow-hidden">
@@ -111,7 +264,7 @@ export default function DashboardPage() {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-[17px] font-semibold tracking-wide text-slate-800">Dashboard</h1>
+            <h1 className="text-[17px] font-semibold tracking-wide text-slate-800 ml-4 lg:ml-6">Dashboard</h1>
           </div>
           
           <div className="flex items-center gap-4">
@@ -128,47 +281,135 @@ export default function DashboardPage() {
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#ff7a00] to-amber-500 flex items-center justify-center font-bold text-xs text-white">
                 CH
               </div>
-              <span className="hidden md:inline text-xs font-semibold text-slate-600">Color Hut Admin</span>
+              <span className="hidden md:inline text-xs font-semibold text-slate-600">{userDisplayName}</span>
             </div>
           </div>
         </header>
 
         {/* Content Body */}
-        <main className="p-6 max-w-[1400px] w-full mx-auto flex-1 flex flex-col gap-6">
+        <main className="p-6 w-full flex-1 flex flex-col gap-6">
           
           {/* Section: Welcome */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-white via-white to-slate-50/50 border border-slate-200 rounded-[16px] p-5 shadow-sm">
-            <div>
-              <h2 className="text-[19px] font-bold text-slate-900 tracking-wide">Welcome Back, Color Hut!</h2>
-              <p className="text-xs text-slate-500 mt-1">Here is a summary of your restaurant performance today.</p>
+          <div className="bg-gradient-to-r from-[#1c2b4a] to-[#f97415] text-white p-6 sm:p-8 rounded-xl shadow-xl print:hidden">
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center">
+              Welcome {displayNameTwoWords} <Hand className="ml-2 h-7 w-7 transform rotate-[20deg] text-yellow-300" />
+            </h1>
+            <p className="text-sm sm:text-base text-white/90 mt-1">
+              Here&apos;s an overview of your business activity.
+            </p>
+          </div>
+
+          {/* Section: Filter Controls */}
+          <div className={`${userRole === "admin" ? "grid grid-cols-2 gap-3 sm:gap-4" : "flex justify-end"} mb-6 print:hidden`}>
+            {userRole === "admin" && (
+              <div className="border text-card-foreground shadow-sm bg-card rounded-xl sm:rounded-lg">
+                <div className="p-2.5 sm:p-4 flex flex-col sm:flex-row items-center sm:justify-between space-y-2 sm:space-y-0 text-center sm:text-left">
+                  <div className="flex items-center text-[10px] sm:text-sm text-muted-foreground font-semibold sm:font-normal uppercase sm:capitalize tracking-wider sm:tracking-normal">
+                    <Store className="h-3.5 w-3.5 sm:h-5 sm:w-5 mr-1.5 sm:mr-2 text-primary/80" />
+                    <span>Select Branch</span>
+                  </div>
+                  <div className="relative w-full sm:w-auto flex justify-center sm:justify-end">
+                    <button 
+                      onClick={() => {
+                        if (userRole === "admin") {
+                          setIsBranchDropdownOpen(!isBranchDropdownOpen);
+                        }
+                      }}
+                      disabled={userRole !== "admin"}
+                      className={`inline-flex items-center justify-between gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-[#E1E7EF] rounded-[10px] px-3 text-xs h-9 sm:h-10 truncate w-full sm:w-[160px] ${
+                        userRole === "admin" 
+                          ? "bg-[#EEEFF2] hover:bg-[#E2E4E8] cursor-pointer text-slate-800" 
+                          : "bg-neutral-100 text-neutral-400 cursor-not-allowed"
+                      }`} 
+                      type="button" 
+                    >
+                      <span>{getSelectedBranchName()}</span>
+                      {userRole === "admin" && <ChevronDown className="ml-1.5 h-3.5 w-3.5 opacity-70" />}
+                    </button>
+
+                    {isBranchDropdownOpen && (
+                      <div className="absolute right-0 top-11 z-50 w-full sm:w-[180px] bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 animate-in fade-in slide-in-from-top-2 duration-150">
+                        {userRole === "admin" && (
+                          <button
+                            onClick={() => {
+                              setSelectedBranchId("all");
+                              setIsBranchDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-xs font-semibold hover:bg-slate-50 transition-colors ${
+                              selectedBranchId === "all" ? "text-[#ff7a00]" : "text-slate-700"
+                            }`}
+                          >
+                            All Branches
+                          </button>
+                        )}
+                        {allBranches.map((branch) => (
+                          <button
+                            key={branch.id}
+                            onClick={() => {
+                              setSelectedBranchId(branch.id);
+                              setIsBranchDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-xs font-semibold hover:bg-slate-50 transition-colors ${
+                              selectedBranchId === branch.id ? "text-[#ff7a00]" : "text-slate-700"
+                            }`}
+                          >
+                            {branch.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div className={`border text-card-foreground shadow-sm bg-card rounded-xl sm:rounded-lg ${userRole !== "admin" ? "w-full sm:w-[320px]" : ""}`}>
+              <div className="p-2.5 sm:p-4 flex flex-col sm:flex-row items-center sm:justify-between space-y-2 sm:space-y-0 text-center sm:text-left">
+                <div className="flex items-center text-[10px] sm:text-sm text-muted-foreground font-semibold sm:font-normal uppercase sm:capitalize tracking-wider sm:tracking-normal">
+                  <CalendarDays className="h-3.5 w-3.5 sm:h-5 sm:w-5 mr-1.5 sm:mr-2 text-primary/80" />
+                  <span>Filter</span>
+                </div>
+                <div className="relative w-full sm:w-auto">
+                  <button 
+                    onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+                    className="inline-flex items-center justify-between gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#E1E7EF] bg-[#EEEFF2] hover:bg-[#E2E4E8] rounded-[10px] px-3 text-xs h-9 sm:h-10 truncate w-full sm:w-auto" 
+                    type="button" 
+                    id="radix-_r_1p_" 
+                    aria-haspopup="menu" 
+                    aria-expanded={isDatePickerOpen} 
+                    data-state={isDatePickerOpen ? "open" : "closed"}
+                  >
+                    <div className="flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4 opacity-85" />
+                      <span className="truncate">{selectedRange}</span>
+                    </div>
+                    <ChevronDown className="ml-1.5 h-3.5 w-3.5 opacity-70" />
+                  </button>
+
+                  {/* Date Range Picker Dropdown Popover */}
+                  <DateRangePicker
+                    selectedRange={selectedRange}
+                    onRangeChange={setSelectedRange}
+                    isOpen={isDatePickerOpen}
+                    onClose={() => setIsDatePickerOpen(false)}
+                  />
+                </div>
+              </div>
             </div>
-            <button className="flex items-center gap-1.5 text-xs font-bold tracking-wide uppercase px-4 py-2.5 bg-[#ff7a00] hover:bg-[#e06c00] text-white rounded-[12px] shadow-[0_4px_12px_rgba(255,122,0,0.2)] transition-all shrink-0 self-start sm:self-auto hover:translate-y-[-1px]">
-              <Plus className="w-4 h-4" /> New Order
-            </button>
           </div>
 
           {/* Section: Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, i) => {
-              const Icon = stat.icon;
-              return (
-                <div 
-                  key={i} 
-                  className="bg-white border border-slate-200 rounded-[16px] p-5 flex items-center justify-between shadow-sm transition-all duration-200 hover:border-slate-300 hover:translate-y-[-2px]"
-                >
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">{stat.label}</span>
-                    <span className="text-xl font-bold text-slate-900 tracking-tight">{stat.value}</span>
-                    <span className={`text-[11px] font-semibold flex items-center gap-1 ${stat.isPositive ? "text-emerald-600" : "text-rose-600"}`}>
-                      {stat.change} <span className="text-slate-400 font-normal">vs yesterday</span>
-                    </span>
-                  </div>
-                  <div className={`p-3.5 rounded-[14px] ${stat.color}`}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+            {stats.map((stat, i) => (
+              <StatsCard
+                key={i}
+                label={stat.label}
+                value={stat.value}
+                icon={stat.icon}
+                iconColorClass={stat.iconColorClass}
+                iconBgClass={stat.iconBgClass}
+              />
+            ))}
           </div>
 
           {/* Section: Chart & Popular Items */}
@@ -266,6 +507,7 @@ export default function DashboardPage() {
                 <thead>
                   <tr className="border-b border-slate-100 text-[10px] font-bold tracking-wider uppercase text-slate-500">
                     <th className="pb-3 pl-2">Order ID</th>
+                    {selectedBranchId === "all" && <th className="pb-3">Branch</th>}
                     <th className="pb-3">Table</th>
                     <th className="pb-3">Items</th>
                     <th className="pb-3 text-right">Price</th>
@@ -284,6 +526,13 @@ export default function DashboardPage() {
                     return (
                       <tr key={idx} className="hover:bg-slate-50/50 transition-colors group">
                         <td className="py-3.5 pl-2 font-semibold text-slate-700 group-hover:text-slate-900">{ord.id}</td>
+                        {selectedBranchId === "all" && (
+                          <td className="py-3.5 font-semibold text-slate-500">
+                            <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-medium">
+                              {ord.branchName}
+                            </span>
+                          </td>
+                        )}
                         <td className="py-3.5 font-bold text-[#ff7a00]">Table {ord.table}</td>
                         <td className="py-3.5 text-slate-600 max-w-[200px] truncate">{ord.items}</td>
                         <td className="py-3.5 text-right font-bold text-slate-900">{ord.total}</td>

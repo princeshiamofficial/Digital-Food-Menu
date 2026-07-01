@@ -3,6 +3,10 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
+import StatsCard from "../../../ui/StatsCard";
+import Dropdown from "../../../ui/Dropdown";
+import { EmojiProvider, Emoji } from "react-apple-emojis";
+import emojiData from "react-apple-emojis/src/data.json";
 import { 
   Menu, 
   Bell, 
@@ -34,6 +38,28 @@ interface LogEntry {
   item: string;
   quantity: string;
 }
+
+const getCategoryAppleEmojiName = (category: string): string => {
+  const map: Record<string, string> = {
+    all: "fork-and-knife-with-plate",
+    popular: "fire",
+    burgers: "hamburger",
+    sides: "french-fries",
+    beverages: "cup-with-straw",
+    pizza: "pizza",
+    pasta: "spaghetti",
+    desserts: "shortcake",
+    sushi: "sushi",
+    ramen: "steaming-bowl",
+    appetizers: "dumpling",
+    mains: "pot-of-food",
+    "rice & noodles": "curry-rice",
+    japanese: "sushi",
+    asian: "chopsticks",
+    ingredients: "egg"
+  };
+  return map[category.trim().toLowerCase()] || "sparkles";
+};
 
 export default function InventoryPage() {
   const router = useRouter();
@@ -188,8 +214,40 @@ export default function InventoryPage() {
   const lowStockCount = items.filter(x => x.status === "low-stock").length;
   const outOfStockCount = items.filter(x => x.status === "out-of-stock").length;
 
+  const inventoryStats = [
+    {
+      label: "Cataloged Items",
+      value: `${totalStockItems} Items`,
+      icon: Package,
+      iconColorClass: "text-[#1A73E8]",
+      iconBgClass: "bg-[#E8F0FE]",
+    },
+    {
+      label: "Low Stock Warning",
+      value: `${lowStockCount} Items`,
+      icon: AlertTriangle,
+      iconColorClass: "text-[#EA580C]",
+      iconBgClass: "bg-[#FFF3D2]",
+    },
+    {
+      label: "Out of Stock",
+      value: `${outOfStockCount} Items`,
+      icon: X,
+      iconColorClass: "text-[#D93025]",
+      iconBgClass: "bg-[#FCE8E6]",
+    },
+    {
+      label: "Stock Valuation",
+      value: `$${calculateStockValue().toFixed(2)}`,
+      icon: DollarSign,
+      iconColorClass: "text-[#ff7a00]",
+      iconBgClass: "bg-[#FFF5E6]",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex text-slate-800 font-sans overflow-hidden">
+    <EmojiProvider data={emojiData}>
+      <div className="min-h-screen bg-[#f8fafc] flex text-slate-800 font-sans overflow-hidden">
       
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex h-screen shrink-0">
@@ -273,52 +331,17 @@ export default function InventoryPage() {
         <main className="p-6 w-full flex-1 flex flex-col gap-6">
           
           {/* Quick Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            <div className="bg-white border border-slate-200 rounded-[16px] p-5 flex items-center justify-between shadow-sm">
-              <div className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">Cataloged items</span>
-                <span className="text-xl font-bold text-slate-900">{totalStockItems} Items</span>
-                <span className="text-[10px] text-slate-400">Total catalog tracked</span>
-              </div>
-              <div className="p-3.5 rounded-[14px] bg-blue-50 text-blue-600">
-                <Package className="w-5 h-5" />
-              </div>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-[16px] p-5 flex items-center justify-between shadow-sm">
-              <div className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold tracking-wider uppercase text-slate-550">Low stock warning</span>
-                <span className="text-xl font-bold text-amber-600">{lowStockCount} Items</span>
-                <span className="text-[10px] text-amber-500 font-medium">Needs replenishment</span>
-              </div>
-              <div className="p-3.5 rounded-[14px] bg-amber-50 text-amber-600">
-                <AlertTriangle className="w-5 h-5" />
-              </div>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-[16px] p-5 flex items-center justify-between shadow-sm">
-              <div className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">Out of Stock</span>
-                <span className="text-xl font-bold text-rose-600">{outOfStockCount} Items</span>
-                <span className="text-[10px] text-rose-500 font-medium">Inactive in online menus</span>
-              </div>
-              <div className="p-3.5 rounded-[14px] bg-rose-50 text-rose-600">
-                <X className="w-5 h-5" />
-              </div>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-[16px] p-5 flex items-center justify-between shadow-sm">
-              <div className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">Stock Valuation</span>
-                <span className="text-xl font-bold text-[#ff7a00]">${calculateStockValue().toFixed(2)}</span>
-                <span className="text-[10px] text-slate-400">Total raw inventory cost</span>
-              </div>
-              <div className="p-3.5 rounded-[14px] bg-orange-50 text-[#ff7a00]">
-                <DollarSign className="w-5 h-5" />
-              </div>
-            </div>
-
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+            {inventoryStats.map((stat, i) => (
+              <StatsCard
+                key={i}
+                label={stat.label}
+                value={stat.value}
+                icon={stat.icon}
+                iconColorClass={stat.iconColorClass}
+                iconBgClass={stat.iconBgClass}
+              />
+            ))}
           </div>
 
           {/* Catalog & History Split */}
@@ -336,13 +359,16 @@ export default function InventoryPage() {
                     <button
                       key={idx}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                         selectedCategory === cat 
                           ? "bg-[#ff7a00] text-white shadow-sm"
                           : "text-slate-550 hover:text-slate-850 bg-slate-50 border border-slate-200 hover:bg-slate-100"
                       }`}
                     >
-                      {cat}
+                      <span className="w-4 h-4 flex items-center justify-center">
+                        <Emoji name={getCategoryAppleEmojiName(cat)} className="w-full h-full object-contain" />
+                      </span>
+                      <span>{cat}</span>
                     </button>
                   ))}
                 </div>
@@ -358,16 +384,16 @@ export default function InventoryPage() {
                   </button>
 
                   {/* Status Dropdown */}
-                  <select
+                  <Dropdown
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as any)}
-                    className="bg-white border border-slate-200 rounded-xl text-xs font-bold px-3 py-2 text-slate-700 focus:outline-none focus:border-[#ff7a00] shadow-sm"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="in-stock">In Stock</option>
-                    <option value="low-stock">Low Stock</option>
-                    <option value="out-of-stock">Out of Stock</option>
-                  </select>
+                    onChange={(val) => setStatusFilter(val as "all" | "in-stock" | "low-stock" | "out-of-stock")}
+                    options={[
+                      { value: "all", label: "All Status" },
+                      { value: "in-stock", label: "In Stock" },
+                      { value: "low-stock", label: "Low Stock" },
+                      { value: "out-of-stock", label: "Out of Stock" },
+                    ]}
+                  />
 
                   {/* Search box */}
                   <div className="relative">
@@ -659,5 +685,6 @@ export default function InventoryPage() {
       )}
 
     </div>
+    </EmojiProvider>
   );
 }

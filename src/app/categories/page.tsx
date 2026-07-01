@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
+import { EmojiProvider, Emoji } from "react-apple-emojis";
+import emojiData from "react-apple-emojis/src/data.json";
 import { 
   Menu, 
   Bell, 
@@ -21,7 +23,103 @@ interface Category {
   name: string;
   description: string;
   itemCount: number;
+  emoji?: string;
 }
+
+const AVAILABLE_MENU_EMOJIS = [
+  // Fast Food & Mains
+  { name: "hamburger", label: "🍔" },
+  { name: "french-fries", label: "🍟" },
+  { name: "pizza", label: "🍕" },
+  { name: "spaghetti", label: "🍝" },
+  { name: "steaming-bowl", label: "🍜" },
+  { name: "sushi", label: "🍣" },
+  { name: "dumpling", label: "🥟" },
+  { name: "pot-of-food", label: "🍲" },
+  { name: "curry-rice", label: "🍛" },
+  { name: "taco", label: "🌮" },
+  { name: "burrito", label: "🌯" },
+  { name: "hot-dog", label: "🌭" },
+  { name: "sandwich", label: "🥪" },
+  { name: "poultry-leg", label: "🍗" },
+  { name: "meat-on-bone", label: "🍖" },
+  { name: "bacon", label: "🥓" },
+  { name: "fried-shrimp", label: "🍤" },
+  
+  // Drinks & Beverages
+  { name: "cup-with-straw", label: "🥤" },
+  { name: "bubble-tea", label: "🧋" },
+  { name: "hot-beverage", label: "☕" },
+  { name: "teapot", label: "🫖" },
+  { name: "beer-mug", label: "🍺" },
+  { name: "clinking-beer-mugs", label: "🍻" },
+  { name: "wine-glass", label: "🍷" },
+  { name: "cocktail-glass", label: "🍸" },
+  { name: "tropical-drink", label: "🍹" },
+  { name: "sake", label: "🍶" },
+  { name: "bottle-with-popping-cork", label: "🍾" },
+  { name: "glass-of-milk", label: "🥛" },
+
+  // Desserts & Breads
+  { name: "shortcake", label: "🍰" },
+  { name: "birthday-cake", label: "🎂" },
+  { name: "cupcake", label: "🧁" },
+  { name: "doughnut", label: "🍩" },
+  { name: "cookie", label: "🍪" },
+  { name: "ice-cream", label: "🍨" },
+  { name: "soft-ice-cream", label: "🍦" },
+  { name: "chocolate-bar", label: "🍫" },
+  { name: "candy", label: "🍬" },
+  { name: "lollipop", label: "🍭" },
+  { name: "honey-pot", label: "🍯" },
+  { name: "bread", label: "🍞" },
+  { name: "croissant", label: "🥐" },
+  { name: "baguette-bread", label: "🥖" },
+  { name: "bagel", label: "🥯" },
+  { name: "waffle", label: "🧇" },
+  { name: "pancakes", label: "🥞" },
+
+  // Fruits, Vegetables & Ingredients
+  { name: "green-salad", label: "🥗" },
+  { name: "cooking", label: "🍳" },
+  { name: "cheese-wedge", label: "🧀" },
+  { name: "tomato", label: "🍅" },
+  { name: "hot-pepper", label: "🌶️" },
+  { name: "avocado", label: "🥑" },
+  { name: "lemon", label: "🍋" },
+  { name: "watermelon", label: "🍉" },
+  { name: "strawberry", label: "🍓" },
+  { name: "grapes", label: "🍇" },
+  { name: "melon", label: "🍈" },
+  { name: "banana", label: "🍌" },
+  { name: "pineapple", label: "🍍" },
+  { name: "mango", label: "🥭" },
+  { name: "red-apple", label: "🍎" },
+  { name: "pear", label: "🍐" },
+  { name: "cherries", label: "🍒" },
+  { name: "broccoli", label: "🥦" },
+  { name: "garlic", label: "🧄" },
+  { name: "onion", label: "🧅" }
+];
+
+const getCategoryAppleEmojiName = (category: string): string => {
+  const map: Record<string, string> = {
+    all: "fork-and-knife-with-plate",
+    popular: "fire",
+    burgers: "hamburger",
+    sides: "french-fries",
+    beverages: "cup-with-straw",
+    pizza: "pizza",
+    pasta: "spaghetti",
+    desserts: "shortcake",
+    sushi: "sushi",
+    ramen: "steaming-bowl",
+    appetizers: "dumpling",
+    mains: "pot-of-food",
+    "rice & noodles": "curry-rice",
+  };
+  return map[category.trim().toLowerCase()] || "sparkles";
+};
 
 export default function CategoriesPage() {
   const router = useRouter();
@@ -39,6 +137,7 @@ export default function CategoriesPage() {
   // Form states
   const [catName, setCatName] = useState("");
   const [catDescription, setCatDescription] = useState("");
+  const [catEmoji, setCatEmoji] = useState("hamburger");
 
   const handleLogout = () => {
     router.push("/login");
@@ -72,7 +171,8 @@ export default function CategoriesPage() {
       id: newId,
       name: catName,
       description: catDescription,
-      itemCount: 0
+      itemCount: 0,
+      emoji: catEmoji
     };
 
     setCategories(prev => [...prev, newCat]);
@@ -81,6 +181,7 @@ export default function CategoriesPage() {
     // Reset Form
     setCatName("");
     setCatDescription("");
+    setCatEmoji("hamburger");
     setShowAddModal(false);
   };
 
@@ -88,6 +189,7 @@ export default function CategoriesPage() {
     setEditingCategory(cat);
     setCatName(cat.name);
     setCatDescription(cat.description);
+    setCatEmoji(cat.emoji || getCategoryAppleEmojiName(cat.name));
     setShowEditModal(true);
   };
 
@@ -100,7 +202,8 @@ export default function CategoriesPage() {
         return {
           ...x,
           name: catName,
-          description: catDescription
+          description: catDescription,
+          emoji: catEmoji
         };
       }
       return x;
@@ -109,6 +212,7 @@ export default function CategoriesPage() {
     triggerToast(`Updated category "${catName}".`);
     setShowEditModal(false);
     setEditingCategory(null);
+    setCatEmoji("hamburger");
   };
 
   const handleDeleteCategory = (catId: string) => {
@@ -127,7 +231,8 @@ export default function CategoriesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex text-slate-800 font-sans overflow-hidden">
+    <EmojiProvider data={emojiData}>
+      <div className="min-h-screen bg-[#f8fafc] flex text-slate-800 font-sans overflow-hidden">
       
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex h-screen shrink-0">
@@ -251,8 +356,8 @@ export default function CategoriesPage() {
                 className="bg-white border border-slate-200 hover:border-slate-350 rounded-2xl p-5 flex gap-4 transition-all duration-200 shadow-sm group"
               >
                 {/* Category Icon Box */}
-                <div className="w-12 h-12 rounded-xl bg-orange-50 text-[#ff7a00] flex items-center justify-center shrink-0 border border-orange-100">
-                  <FolderOpen className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-xl bg-orange-50 text-[#ff7a00] flex items-center justify-center shrink-0 border border-orange-100 p-2.5">
+                  <Emoji name={cat.emoji || getCategoryAppleEmojiName(cat.name)} className="w-full h-full object-contain" />
                 </div>
 
                 {/* Details */}
@@ -333,6 +438,28 @@ export default function CategoriesPage() {
               </div>
 
               <div className="flex flex-col gap-1">
+                <label className="text-[10px] uppercase font-bold text-slate-500">Category Emoji Icon</label>
+                <div className="flex gap-1.5 flex-wrap p-2.5 rounded-xl bg-slate-555 border border-slate-200 max-h-[105px] overflow-y-auto scrollbar-none">
+                  {AVAILABLE_MENU_EMOJIS.map((item) => (
+                    <button
+                      key={item.name}
+                      type="button"
+                      onClick={() => setCatEmoji(item.name)}
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
+                        catEmoji === item.name 
+                          ? "border-[#ff7a00] bg-orange-50/50 shadow-sm scale-110" 
+                          : "border-slate-200/60 bg-white hover:border-slate-350 hover:bg-slate-55"
+                      }`}
+                    >
+                      <span className="w-5 h-5 flex items-center justify-center">
+                        <Emoji name={item.name} className="w-full h-full object-contain" />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
                 <label className="text-[10px] uppercase font-bold text-slate-500">Description</label>
                 <textarea
                   placeholder="Enter a brief category description"
@@ -398,6 +525,28 @@ export default function CategoriesPage() {
               </div>
 
               <div className="flex flex-col gap-1">
+                <label className="text-[10px] uppercase font-bold text-slate-500">Category Emoji Icon</label>
+                <div className="flex gap-1.5 flex-wrap p-2.5 rounded-xl bg-slate-555 border border-slate-200 max-h-[105px] overflow-y-auto scrollbar-none">
+                  {AVAILABLE_MENU_EMOJIS.map((item) => (
+                    <button
+                      key={item.name}
+                      type="button"
+                      onClick={() => setCatEmoji(item.name)}
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
+                        catEmoji === item.name 
+                          ? "border-[#ff7a00] bg-orange-50/50 shadow-sm scale-110" 
+                          : "border-slate-200/60 bg-white hover:border-slate-350 hover:bg-slate-55"
+                      }`}
+                    >
+                      <span className="w-5 h-5 flex items-center justify-center">
+                        <Emoji name={item.name} className="w-full h-full object-contain" />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
                 <label className="text-[10px] uppercase font-bold text-slate-500">Description</label>
                 <textarea
                   placeholder="Category Description"
@@ -432,5 +581,6 @@ export default function CategoriesPage() {
       )}
 
     </div>
+    </EmojiProvider>
   );
 }

@@ -8,6 +8,15 @@ export interface MenuItem {
   popular?: boolean;
 }
 
+export interface Branch {
+  id: string;
+  name: string;
+  location: string;
+  phone: string;
+  operatingHours: string;
+  tables: Array<{ name: string; location: string; status: string }>;
+}
+
 export interface Restaurant {
   id: number;
   name: string;
@@ -23,6 +32,7 @@ export interface Restaurant {
   logoImage: string;
   username: string;
   menuItems: MenuItem[];
+  branches?: Branch[];
 }
 
 export const RESTAURANTS: Restaurant[] = [
@@ -40,6 +50,50 @@ export const RESTAURANTS: Restaurant[] = [
     image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
     logoImage: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=80&auto=format&fit=crop&q=80",
     username: "burgercraftlab",
+    branches: [
+      {
+        id: "dhanmondi",
+        name: "Dhanmondi Branch",
+        location: "Dhanmondi, Dhaka",
+        phone: "+880 1712-345678",
+        operatingHours: "11:00 AM - 11:00 PM",
+        tables: [
+          { name: "Table 01", location: "Window Side", status: "Active" },
+          { name: "Table 02", location: "Window Side", status: "Active" },
+          { name: "Table 03", location: "Main Hall", status: "Active" },
+          { name: "Table 04", location: "Main Hall", status: "Active" },
+          { name: "Table 05", location: "Main Hall", status: "Active" },
+          { name: "Table 06", location: "VIP Lounge", status: "Active" },
+          { name: "Table 07", location: "VIP Lounge", status: "Active" },
+          { name: "Table 08", location: "VIP Lounge", status: "Active" }
+        ]
+      },
+      {
+        id: "gulshan",
+        name: "Gulshan Branch",
+        location: "Gulshan-2, Dhaka",
+        phone: "+880 1712-876543",
+        operatingHours: "12:00 PM - 12:00 AM",
+        tables: [
+          { name: "Table 01", location: "Window Side", status: "Active" },
+          { name: "Table 02", location: "Terrace", status: "Active" },
+          { name: "Table 03", location: "Main Room", status: "Active" },
+          { name: "Table 04", location: "Main Room", status: "Active" }
+        ]
+      },
+      {
+        id: "uttara",
+        name: "Uttara Branch",
+        location: "Sector 11, Uttara, Dhaka",
+        phone: "+880 1712-112233",
+        operatingHours: "11:00 AM - 10:00 PM",
+        tables: [
+          { name: "Table 01", location: "Ground Floor", status: "Active" },
+          { name: "Table 02", location: "Ground Floor", status: "Active" },
+          { name: "Table 03", location: "First Floor", status: "Active" }
+        ]
+      }
+    ],
     menuItems: [
       {
         id: 11,

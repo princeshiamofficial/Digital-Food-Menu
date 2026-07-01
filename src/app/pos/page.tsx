@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import { RESTAURANTS } from "../data/restaurants";
+import { useHorizontalScroll } from "../../lib/hooks";
+import { EmojiProvider, Emoji } from "react-apple-emojis";
+import emojiData from "react-apple-emojis/src/data.json";
 import { 
   Menu, 
   Bell, 
@@ -26,6 +29,25 @@ interface CartItem {
   quantity: number;
 }
 
+const getCategoryAppleEmojiName = (category: string): string => {
+  const map: Record<string, string> = {
+    all: "fork-and-knife-with-plate",
+    popular: "fire",
+    burgers: "hamburger",
+    sides: "french-fries",
+    beverages: "cup-with-straw",
+    pizza: "pizza",
+    pasta: "spaghetti",
+    desserts: "shortcake",
+    sushi: "sushi",
+    ramen: "steaming-bowl",
+    appetizers: "dumpling",
+    mains: "pot-of-food",
+    "rice & noodles": "curry-rice",
+  };
+  return map[category.trim().toLowerCase()] || "sparkles";
+};
+
 export default function PosPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("pos");
@@ -38,29 +60,71 @@ export default function PosPage() {
   const [paymentMethod, setPaymentMethod] = useState<"Cash" | "Card" | "Mobile">("Card");
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const categoriesScrollRef = useHorizontalScroll();
+
+  // Dynamic user roles and branch states
+  const [userRole, setUserRole] = useState("admin");
+  const [userDisplayName, setUserDisplayName] = useState("Color Hut Admin");
+  const [userAssignedBranchId, setUserAssignedBranchId] = useState("");
+  const [selectedBranchId, setSelectedBranchId] = useState("dhanmondi");
+  const [allBranches, setAllBranches] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (isLoggedIn !== "true") {
+        router.replace("/login");
+        return;
+      }
+      
+      const role = localStorage.getItem("userRole") || "admin";
+      const name = localStorage.getItem("userDisplayName") || "Color Hut Admin";
+      const branchId = localStorage.getItem("userAssignedBranchId") || "";
+      
+      setUserRole(role);
+      setUserDisplayName(name);
+      setUserAssignedBranchId(branchId);
+      
+      if (role === "manager" && branchId) {
+        setSelectedBranchId(branchId);
+      } else {
+        setSelectedBranchId("dhanmondi");
+      }
+    }
+  }, [router]);
+
+  // Load branches
+  React.useEffect(() => {
+    const restaurant = RESTAURANTS.find(r => r.id === 1);
+    const defaults = restaurant?.branches || [];
+    try {
+      const storedBranchesStr = localStorage.getItem("restaurant_branches");
+      if (storedBranchesStr) {
+        const customs = JSON.parse(storedBranchesStr);
+        setAllBranches([...defaults, ...customs]);
+      } else {
+        setAllBranches(defaults);
+      }
+    } catch (e) {
+      setAllBranches(defaults);
+    }
+  }, []);
 
   const handleLogout = () => {
     router.push("/login");
   };
 
-  // Flatten unique items
+  // Menu items filtered to active restaurant (Burger Craft Lab, ID: 1)
   const menuItems = React.useMemo(() => {
-    const list: Array<{ id: number; name: string; price: number; category: string; image: string }> = [];
-    RESTAURANTS.forEach(restaurant => {
-      restaurant.menuItems.forEach(item => {
-        const uniqueId = restaurant.id * 1000 + item.id;
-        if (!list.some(x => x.id === uniqueId)) {
-          list.push({
-            id: uniqueId,
-            name: item.name,
-            price: item.price,
-            category: item.category,
-            image: item.image
-          });
-        }
-      });
-    });
-    return list;
+    const restaurant = RESTAURANTS.find(r => r.id === 1);
+    if (!restaurant) return [];
+    return restaurant.menuItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      category: item.category,
+      image: item.image
+    }));
   }, []);
 
   const categories = React.useMemo(() => {
@@ -122,7 +186,8 @@ export default function PosPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex text-slate-800 font-sans overflow-hidden">
+    <EmojiProvider data={emojiData}>
+      <div className="min-h-screen bg-[#f8fafc] flex text-slate-800 font-sans overflow-hidden">
       
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex h-screen shrink-0">
@@ -176,8 +241,25 @@ export default function PosPage() {
               <span>POS Terminal Checkout</span>
             </h1>
           </div>
-          
           <div className="flex items-center gap-4">
+            {/* Branch Switcher (Admin-only interactive) */}
+            {userRole === "admin" && (
+              <div className="relative">
+                <select
+                  value={selectedBranchId}
+                  onChange={(e) => setSelectedBranchId(e.target.value)}
+                  disabled={userRole !== "admin"}
+                  className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-250 bg-white cursor-pointer text-slate-800 hover:bg-slate-50"
+                >
+                  {allBranches.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="relative">
               <button className="p-2 rounded-lg hover:bg-slate-100 text-slate-550 hover:text-slate-855 transition-colors relative">
                 <Bell className="w-[18px] h-[18px]" />
@@ -189,7 +271,7 @@ export default function PosPage() {
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#ff7a00] to-amber-500 flex items-center justify-center font-bold text-xs text-white">
                 CH
               </div>
-              <span className="hidden md:inline text-xs font-semibold text-slate-600">Color Hut Cashier</span>
+              <span className="hidden md:inline text-xs font-semibold text-slate-600">{userDisplayName}</span>
             </div>
           </div>
         </header>
@@ -203,18 +285,21 @@ export default function PosPage() {
             {/* Search and Category Filters */}
             <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
               {/* Category tabs */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+              <div ref={categoriesScrollRef} className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
                 {categories.map((cat, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                       selectedCategory === cat 
                         ? "bg-[#ff7a00] text-white shadow-sm"
                         : "text-slate-550 hover:text-slate-850 bg-white border border-slate-200 hover:bg-slate-100"
                     }`}
                   >
-                    {cat}
+                    <span className="w-4 h-4 flex items-center justify-center">
+                      <Emoji name={getCategoryAppleEmojiName(cat)} className="w-full h-full object-contain" />
+                    </span>
+                    <span>{cat}</span>
                   </button>
                 ))}
               </div>
@@ -409,9 +494,15 @@ export default function PosPage() {
 
             {/* Receipt Summary */}
             <div className="w-full bg-slate-50 rounded-xl p-4 text-left text-xs border border-slate-200 flex flex-col gap-2 font-mono">
-              <div className="border-b border-dashed border-slate-200 pb-2 flex justify-between text-[10px] text-slate-500">
-                <span>TABLE: T-{tableNumber}</span>
-                <span>METHOD: {paymentMethod.toUpperCase()}</span>
+              <div className="border-b border-dashed border-slate-200 pb-2 flex flex-col gap-1 text-[10px] text-slate-500">
+                <div className="flex justify-between font-bold text-slate-800">
+                  <span>BRANCH: {(allBranches.find(b => b.id === selectedBranchId)?.name || selectedBranchId).toUpperCase()}</span>
+                  <span>TABLE: T-{tableNumber}</span>
+                </div>
+                <div className="flex justify-between text-[9px]">
+                  <span>METHOD: {paymentMethod.toUpperCase()}</span>
+                  <span>TIME: {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 {cart.map((c, i) => (
@@ -438,5 +529,6 @@ export default function PosPage() {
       )}
 
     </div>
+    </EmojiProvider>
   );
 }

@@ -9,9 +9,12 @@ import {
   Monitor,
   Settings,
   ClipboardList,
-  Tags
+  Tags,
+  Store,
+  QrCode
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface SidebarProps {
   activeTab: string;
@@ -35,20 +38,45 @@ export default function Sidebar({
   isCollapsed = false,
 }: SidebarProps) {
   
+  const [userRole, setUserRole] = useState("admin");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const role = localStorage.getItem("userRole") || "admin";
+      setUserRole(role);
+    }
+  }, []);
+
   // Sidebar navigation items for the Digital Food Menu application
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutGrid },
+    { id: "pos", label: "POS", icon: Monitor },
     { id: "orders", label: "Orders", icon: Package },
+    { id: "kitchen", label: "Kitchen", icon: ChefHat },
+    { id: "inventory", label: "Inventory", icon: ClipboardList },
     { id: "menu-availability", label: "Menu", icon: Utensils },
     { id: "categories", label: "Categories", icon: Tags },
-    { id: "kitchen", label: "Kitchen", icon: ChefHat },
-    { id: "pos", label: "POS", icon: Monitor },
-    { id: "inventory", label: "Inventory", icon: ClipboardList },
-    { id: "settings", label: "Settings", icon: Settings },
+    ...(userRole === "admin" ? [{ id: "branches", label: "Manage Branch", icon: Store, href: "/branches" }] : []),
+    { id: "qr-codes", label: "Table QR Codes", icon: QrCode, href: "/qr-codes" },
+    ...(userRole === "admin" ? [{ id: "settings", label: "Settings", icon: Settings }] : []),
   ];
 
   // Map our dashboard page states to show the correct selected state
   const isSelected = (itemId: string) => {
+    if (typeof window !== "undefined") {
+      const pathname = window.location.pathname;
+
+      if (itemId === "branches") {
+        return pathname.includes("/branches");
+      }
+      if (itemId === "qr-codes") {
+        return pathname.includes("/qr-codes");
+      }
+      if (itemId === "settings") {
+        return pathname.includes("/settings");
+      }
+    }
+
     if (itemId === "orders") {
       return activeTab === "all-orders" || activeTab === "active" || activeTab === "completed" || activeTab === "orders";
     }
@@ -112,7 +140,7 @@ export default function Sidebar({
           return (
             <Link
               key={item.id}
-              href={item.id === "dashboard" ? "/dashboard" : item.id === "orders" ? "/orders" : `/${item.id}`}
+              href={(item as any).href || (item.id === "dashboard" ? "/dashboard" : item.id === "orders" ? "/orders" : `/${item.id}`)}
               onClick={() => handleItemClick(item.id)}
               title={isCollapsed ? item.label : undefined}
               className={`w-full flex items-center ${isCollapsed ? "justify-center p-3" : "justify-between px-3.5 py-3"} rounded-[12px] text-[13.5px] font-semibold tracking-wide transition-all duration-150 group focus:outline-none ${
@@ -135,7 +163,10 @@ export default function Sidebar({
       {/* Bottom section (separating border and Logout button) */}
       <div className={`border-t border-[#1a2b49]/30 py-4 ${isCollapsed ? "px-2" : "px-3"} shrink-0`}>
         <button
-          onClick={handleLogout}
+          onClick={() => {
+            localStorage.removeItem("isLoggedIn");
+            handleLogout();
+          }}
           title={isCollapsed ? "Logout" : undefined}
           className={`w-full flex items-center ${isCollapsed ? "justify-center p-3" : "gap-3 px-3.5 py-3"} rounded-[12px] text-[13.5px] font-semibold tracking-wide text-slate-300 hover:text-white hover:bg-red-950/15 transition-all duration-150 group focus:outline-none`}
         >

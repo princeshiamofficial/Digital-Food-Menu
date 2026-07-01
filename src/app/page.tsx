@@ -94,7 +94,7 @@ export default function Home() {
 
   const playBeep = () => {
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       const oscillator = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
       oscillator.connect(gainNode);
@@ -593,7 +593,7 @@ export default function Home() {
                 Restaurants
               </h3>
               <div className="flex-1 h-[2px] bg-neutral-200/80"></div>
-              <a 
+              <Link 
                 href="/restaurants"
                 className="text-sm sm:text-base font-semibold text-neutral-500 hover:text-neutral-950 transition-colors duration-200 flex items-center gap-1 sm:gap-1.5 whitespace-nowrap shrink-0"
               >
@@ -607,7 +607,7 @@ export default function Home() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-              </a>
+              </Link>
             </div>
 
             {/* Restaurants Grid Container */}
@@ -924,112 +924,140 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Features Grid: 3x2 on desktop, 1 on mobile */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 w-full px-2 sm:px-6 md:px-0">
+            {/* Features Flex Layout */}
+            <div className="flex flex-col md:flex-row md:flex-wrap w-full px-2 sm:px-6 md:px-0">
 
-              {/* Card 1: Real-time Kitchen Display */}
-              <div className="flex flex-col bg-white border border-neutral-100/80 rounded-[32px] p-4 sm:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_24px_50px_rgba(0,0,0,0.04)] hover:-translate-y-1.5 transition-all duration-300 h-full group text-left">
+              {/* Feature 1: Real-time Kitchen Display */}
+              <div className="flex gap-4 items-start w-full md:w-1/2 lg:w-1/3 text-left group px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-8 md:border-r lg:border-r border-black/15">
                 <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-rose-50/70 text-rose-500 flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
                   <Monitor className="w-[22px] h-[22px]" strokeWidth={2} />
                 </div>
-                <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight mt-6 sm:mt-8">
-                  Real-time Kitchen Display
-                </h4>
-                <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-3 sm:mt-4 flex-grow">
-                  Instantly route table orders to kitchen display systems. Track preparation status, reduce latency, and ensure kitchen-front alignment without paper tickets.
-                </p>
-                <a href="#" className="mt-6 sm:mt-8 flex items-center gap-1.5 text-sm font-bold text-rose-600 hover:text-rose-700 transition-colors cursor-pointer group/link w-fit">
-                  <span>See more</span>
-                  <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
-                </a>
+                <div className="flex flex-col">
+                  <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight group-hover:text-rose-700 transition-colors duration-300">
+                    Real-time Kitchen Display
+                  </h4>
+                  <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-2">
+                    Instantly route table orders to kitchen display systems. Track preparation status, reduce latency, and ensure kitchen-front alignment without paper tickets.
+                  </p>
+                  <a href="#" className="mt-3 flex items-center gap-1.5 text-sm font-bold text-rose-600 hover:text-rose-700 transition-colors cursor-pointer group/link w-fit">
+                    <span>See more</span>
+                    <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
+                  </a>
+                </div>
               </div>
 
-              {/* Card 2: Digital Menu Management */}
-              <div className="flex flex-col bg-white border border-neutral-100/80 rounded-[32px] p-4 sm:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_24px_50px_rgba(0,0,0,0.04)] hover:-translate-y-1.5 transition-all duration-300 h-full group text-left">
+              {/* Mobile Divider */}
+              <div className="block md:hidden w-full border-t border-black/15"></div>
+
+              {/* Feature 2: Digital Menu Management */}
+              <div className="flex gap-4 items-start w-full md:w-1/2 lg:w-1/3 text-left group px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-8 md:border-r-0 lg:border-r border-black/15">
                 <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-orange-50/70 text-orange-500 flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
                   <BookOpen className="w-[22px] h-[22px]" strokeWidth={2} />
                 </div>
-                <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight mt-6 sm:mt-8">
-                  Digital Menu Management
-                </h4>
-                <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-3 sm:mt-4 flex-grow">
-                  Update pricing, categories, and item availability in real-time. Create beautiful, item-level tags and highlight chef specials or seasonal options easily.
-                </p>
-                <a href="#" className="mt-6 sm:mt-8 flex items-center gap-1.5 text-sm font-bold text-orange-600 hover:text-orange-700 transition-colors cursor-pointer group/link w-fit">
-                  <span>See more</span>
-                  <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
-                </a>
+                <div className="flex flex-col">
+                  <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight group-hover:text-orange-700 transition-colors duration-300">
+                    Digital Menu Management
+                  </h4>
+                  <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-2">
+                    Update pricing, categories, and item availability in real-time. Create beautiful, item-level tags and highlight chef specials or seasonal options easily.
+                  </p>
+                  <a href="#" className="mt-3 flex items-center gap-1.5 text-sm font-bold text-orange-600 hover:text-orange-700 transition-colors cursor-pointer group/link w-fit">
+                    <span>See more</span>
+                    <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
+                  </a>
+                </div>
               </div>
 
-              {/* Card 3: Online Ordering System */}
-              <div className="flex flex-col bg-white border border-neutral-100/80 rounded-[32px] p-4 sm:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_24px_50px_rgba(0,0,0,0.04)] hover:-translate-y-1.5 transition-all duration-300 h-full group text-left">
+              {/* Mobile & Tablet Divider */}
+              <div className="block lg:hidden w-full border-t border-black/15"></div>
+
+              {/* Feature 3: Online Ordering System */}
+              <div className="flex gap-4 items-start w-full md:w-1/2 lg:w-1/3 text-left group px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-8 md:border-r lg:border-r-0 border-black/15">
                 <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-emerald-50/70 text-emerald-500 flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
                   <ShoppingCart className="w-[22px] h-[22px]" strokeWidth={2} />
                 </div>
-                <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight mt-6 sm:mt-8">
-                  Online Ordering System
-                </h4>
-                <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-3 sm:mt-4 flex-grow">
-                  Provide a clean, fast table-side ordering screen directly through customers' web browsers. Supports modifiers, order summaries, and custom requests.
-                </p>
-                <a href="#" className="mt-6 sm:mt-8 flex items-center gap-1.5 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors cursor-pointer group/link w-fit">
-                  <span>See more</span>
-                  <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
-                </a>
+                <div className="flex flex-col">
+                  <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight group-hover:text-emerald-700 transition-colors duration-300">
+                    Online Ordering System
+                  </h4>
+                  <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-2">
+                    Provide a clean, fast table-side ordering screen directly through customers&apos; web browsers. Supports modifiers, order summaries, and custom requests.
+                  </p>
+                  <a href="#" className="mt-3 flex items-center gap-1.5 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors cursor-pointer group/link w-fit">
+                    <span>See more</span>
+                    <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
+                  </a>
+                </div>
               </div>
 
-              {/* Card 4: Secure Payments (bKash) */}
-              <div className="flex flex-col bg-white border border-neutral-100/80 rounded-[32px] p-4 sm:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_24px_50px_rgba(0,0,0,0.04)] hover:-translate-y-1.5 transition-all duration-300 h-full group text-left">
+              {/* Mobile & Desktop Divider (Visible on desktop between Row 1 and Row 2, hidden on tablet since rows divide differently) */}
+              <div className="block md:hidden lg:block w-full border-t border-black/15"></div>
+
+              {/* Feature 4: Secure Payments (bKash) */}
+              <div className="flex gap-4 items-start w-full md:w-1/2 lg:w-1/3 text-left group px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-8 md:border-r-0 lg:border-r border-black/15">
                 <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-pink-50/70 text-pink-500 flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
                   <CreditCard className="w-[22px] h-[22px]" strokeWidth={2} />
                 </div>
-                <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight mt-6 sm:mt-8">
-                  Secure Payments (bKash)
-                </h4>
-                <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-3 sm:mt-4 flex-grow">
-                  Enable fast and secure table-side checkout. Seamless integration with local channels like bKash, card networks, and other digital wallets.
-                </p>
-                <a href="#" className="mt-6 sm:mt-8 flex items-center gap-1.5 text-sm font-bold text-pink-600 hover:text-pink-700 transition-colors cursor-pointer group/link w-fit">
-                  <span>See more</span>
-                  <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
-                </a>
+                <div className="flex flex-col">
+                  <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight group-hover:text-pink-700 transition-colors duration-300">
+                    Secure Payments (bKash)
+                  </h4>
+                  <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-2">
+                    Enable fast and secure table-side checkout. Seamless integration with local channels like bKash, card networks, and other digital wallets.
+                  </p>
+                  <a href="#" className="mt-3 flex items-center gap-1.5 text-sm font-bold text-pink-600 hover:text-pink-700 transition-colors cursor-pointer group/link w-fit">
+                    <span>See more</span>
+                    <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
+                  </a>
+                </div>
               </div>
 
-              {/* Card 5: Sales Analytics */}
-              <div className="flex flex-col bg-white border border-neutral-100/80 rounded-[32px] p-4 sm:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_24px_50px_rgba(0,0,0,0.04)] hover:-translate-y-1.5 transition-all duration-300 h-full group text-left">
+              {/* Mobile & Tablet Divider */}
+              <div className="block lg:hidden w-full border-t border-black/15"></div>
+
+              {/* Feature 5: Sales Analytics */}
+              <div className="flex gap-4 items-start w-full md:w-1/2 lg:w-1/3 text-left group px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-8 md:border-r lg:border-r border-black/15">
                 <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-blue-50/70 text-blue-500 flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
                   <TrendingUp className="w-[22px] h-[22px]" strokeWidth={2} />
                 </div>
-                <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight mt-6 sm:mt-8">
-                  Sales Analytics
-                </h4>
-                <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-3 sm:mt-4 flex-grow">
-                  Access live dashboard analytics. Monitor revenue trends, identify high-performing dishes, and analyze customer behaviors to maximize peak hour sales.
-                </p>
-                <a href="#" className="mt-6 sm:mt-8 flex items-center gap-1.5 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer group/link w-fit">
-                  <span>See more</span>
-                  <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
-                </a>
+                <div className="flex flex-col">
+                  <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight group-hover:text-blue-700 transition-colors duration-300">
+                    Sales Analytics
+                  </h4>
+                  <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-2">
+                    Access live dashboard analytics. Monitor revenue trends, identify high-performing dishes, and analyze customer behaviors to maximize peak hour sales.
+                  </p>
+                  <a href="#" className="mt-3 flex items-center gap-1.5 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer group/link w-fit">
+                    <span>See more</span>
+                    <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
+                  </a>
+                </div>
               </div>
 
-              {/* Card 6: Staff Management */}
-              <div className="flex flex-col bg-white border border-neutral-100/80 rounded-[32px] p-4 sm:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] hover:shadow-[0_24px_50px_rgba(0,0,0,0.04)] hover:-translate-y-1.5 transition-all duration-300 h-full group text-left">
+              {/* Mobile Divider */}
+              <div className="block md:hidden w-full border-t border-black/15"></div>
+
+              {/* Feature 6: Staff Management */}
+              <div className="flex gap-4 items-start w-full md:w-1/2 lg:w-1/3 text-left group px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-8 md:border-r-0 lg:border-r-0 border-black/15">
                 <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-purple-50/70 text-purple-500 flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
                   <Users className="w-[22px] h-[22px]" strokeWidth={2} />
                 </div>
-                <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight mt-6 sm:mt-8">
-                  Staff Management
-                </h4>
-                <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-3 sm:mt-4 flex-grow">
-                  Manage roles, permissions, shifts, and table assignments for chefs, waiters, and cashiers. Ensure seamless daily operations.
-                </p>
-                <a href="#" className="mt-6 sm:mt-8 flex items-center gap-1.5 text-sm font-bold text-purple-600 hover:text-purple-700 transition-colors cursor-pointer group/link w-fit">
-                  <span>See more</span>
-                  <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
-                </a>
+                <div className="flex flex-col">
+                  <h4 className="text-[19px] sm:text-xl font-bold text-neutral-900 tracking-tight group-hover:text-purple-700 transition-colors duration-300">
+                    Staff Management
+                  </h4>
+                  <p className="text-[14px] sm:text-[14.5px] text-neutral-500 font-medium leading-[1.65] mt-2">
+                    Manage roles, permissions, shifts, and table assignments for chefs, waiters, and cashiers. Ensure seamless daily operations.
+                  </p>
+                  <a href="#" className="mt-3 flex items-center gap-1.5 text-sm font-bold text-purple-600 hover:text-purple-700 transition-colors cursor-pointer group/link w-fit">
+                    <span>See more</span>
+                    <span className="transform group-hover:translate-x-1 transition-transform duration-300 select-none">→</span>
+                  </a>
+                </div>
               </div>
 
             </div>
+
           </div>
 
           {/* Testimonials Section */}
@@ -1088,7 +1116,7 @@ export default function Home() {
                   </div>
                   {/* Quote */}
                   <p className="text-xs sm:text-[13px] text-neutral-600 font-semibold italic leading-relaxed line-clamp-3">
-                    "Since transitioning to digital QR menus, our table turnover rate increased by 25%. On busy Friday afternoons, customers scan and order instantly, reducing order delays to zero."
+                    &quot;Since transitioning to digital QR menus, our table turnover rate increased by 25%. On busy Friday afternoons, customers scan and order instantly, reducing order delays to zero.&quot;
                   </p>
                 </div>
                 {/* Author Info */}
@@ -1104,7 +1132,7 @@ export default function Home() {
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="text-xs font-bold text-neutral-950 truncate">Tasnim Rahman</span>
-                    <span className="text-[10px] font-semibold text-emerald-600 truncate">General Manager, Sultan's Dine</span>
+                    <span className="text-[10px] font-semibold text-emerald-600 truncate">General Manager, Sultan&apos;s Dine</span>
                   </div>
                 </div>
               </div>
@@ -1122,7 +1150,7 @@ export default function Home() {
                   </div>
                   {/* Quote */}
                   <p className="text-xs sm:text-[13px] text-neutral-600 font-semibold italic leading-relaxed line-clamp-3">
-                    "Our younger demographic loves the table-side checkout. The bKash integration makes payments frictionless, and the kitchen display prepares orders in real-time."
+                    &quot;Our younger demographic loves the table-side checkout. The bKash integration makes payments frictionless, and the kitchen display prepares orders in real-time.&quot;
                   </p>
                 </div>
                 {/* Author Info */}
@@ -1156,7 +1184,7 @@ export default function Home() {
                   </div>
                   {/* Quote */}
                   <p className="text-xs sm:text-[13px] text-neutral-600 font-semibold italic leading-relaxed line-clamp-3">
-                    "Updating prices and sold-out items across multiple branches used to take hours. Now, we manage everything from one unified web dashboard instantly."
+                    &quot;Updating prices and sold-out items across multiple branches used to take hours. Now, we manage everything from one unified web dashboard instantly.&quot;
                   </p>
                 </div>
                 {/* Author Info */}
@@ -1190,7 +1218,7 @@ export default function Home() {
                   </div>
                   {/* Quote */}
                   <p className="text-xs sm:text-[13px] text-neutral-600 font-semibold italic leading-relaxed line-clamp-3">
-                    "With massive crowds during weekend evening hours, the automated order dispatch directly to the kitchen display has minimized preparation errors completely."
+                    &quot;With massive crowds during weekend evening hours, the automated order dispatch directly to the kitchen display has minimized preparation errors completely.&quot;
                   </p>
                 </div>
                 {/* Author Info */}

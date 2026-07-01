@@ -195,7 +195,7 @@ export default function RestaurantsPage() {
             </svg>
             <h3 className="text-lg font-bold text-neutral-800">No restaurants found</h3>
             <p className="text-xs sm:text-sm text-neutral-500 font-semibold max-w-sm px-6">
-              We couldn't find any kitchen matching "{searchQuery}" under "{selectedCuisine}". Try widening your filters.
+              We couldn&apos;t find any kitchen matching &quot;{searchQuery}&quot; under &quot;{selectedCuisine}&quot;. Try widening your filters.
             </p>
           </div>
         ) : (

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
+import { RESTAURANTS } from "../data/restaurants";
 import { 
   Menu, 
   Bell, 
@@ -28,6 +29,7 @@ interface KitchenOrder {
   elapsedMinutes: number;
   priority: "high" | "medium" | "low";
   status: "new" | "preparing" | "qa" | "ready" | "delivered";
+  branchId?: string;
 }
 
 // Inline SVG Stopwatch Icon Component
@@ -59,7 +61,7 @@ function formatDurationPrecise(totalSeconds: number): string {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = Math.floor(totalSeconds % 60);
 
-  let parts: string[] = [];
+  const parts: string[] = [];
   if (days > 0) {
     parts.push(`${days}d`);
     if (hours > 0) parts.push(`${hours}h`);
@@ -96,7 +98,7 @@ const calculateProgressInfo = (
   const createdAt = new Date(now.getTime() - order.elapsedMinutes * 60 * 1000);
   let totalSlaMinutes = 15;
   let slaStageName = ` (${formatSlaMinutes(15)})`;
-  let showProgressBar = true;
+  const showProgressBar = true;
 
   if (order.status === 'new') {
     totalSlaMinutes = 15;
@@ -171,6 +173,54 @@ export default function KitchenPage() {
   const [selectedOrder, setSelectedOrder] = useState<KitchenOrder | null>(null);
   const [modalState, setModalState] = useState<"closed" | "open" | "closing">("closed");
 
+  // Dynamic user roles and branch states
+  const [userRole, setUserRole] = useState("admin");
+  const [userDisplayName, setUserDisplayName] = useState("Color Hut Admin");
+  const [userAssignedBranchId, setUserAssignedBranchId] = useState("");
+  const [selectedBranchId, setSelectedBranchId] = useState("dhanmondi");
+  const [allBranches, setAllBranches] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (isLoggedIn !== "true") {
+        router.replace("/login");
+        return;
+      }
+      
+      const role = localStorage.getItem("userRole") || "admin";
+      const name = localStorage.getItem("userDisplayName") || "Color Hut Admin";
+      const branchId = localStorage.getItem("userAssignedBranchId") || "";
+      
+      setUserRole(role);
+      setUserDisplayName(name);
+      setUserAssignedBranchId(branchId);
+      
+      if (role === "manager" && branchId) {
+        setSelectedBranchId(branchId);
+      } else {
+        setSelectedBranchId("dhanmondi");
+      }
+    }
+  }, [router]);
+
+  // Load branches
+  useEffect(() => {
+    const restaurant = RESTAURANTS.find(r => r.id === 1);
+    const defaults = restaurant?.branches || [];
+    try {
+      const storedBranchesStr = localStorage.getItem("restaurant_branches");
+      if (storedBranchesStr) {
+        const customs = JSON.parse(storedBranchesStr);
+        setAllBranches([...defaults, ...customs]);
+      } else {
+        setAllBranches(defaults);
+      }
+    } catch (e) {
+      setAllBranches(defaults);
+    }
+  }, []);
+
   const openModal = (order: KitchenOrder) => {
     setSelectedOrder(order);
     setModalState("open");
@@ -203,7 +253,7 @@ export default function KitchenPage() {
     router.push("/login");
   };
 
-  // Mock Kitchen Orders State with 5 stages
+  // Mock Kitchen Orders State with 5 stages (assigned to branchIds)
   const [orders, setOrders] = useState<KitchenOrder[]>([
     {
       id: "ORD-8821",
@@ -214,7 +264,8 @@ export default function KitchenPage() {
       ],
       elapsedMinutes: 4,
       priority: "medium",
-      status: "new"
+      status: "new",
+      branchId: "dhanmondi"
     },
     {
       id: "ORD-8820",
@@ -225,7 +276,8 @@ export default function KitchenPage() {
       ],
       elapsedMinutes: 7,
       priority: "high",
-      status: "new"
+      status: "new",
+      branchId: "gulshan"
     },
     {
       id: "ORD-8819",
@@ -236,7 +288,8 @@ export default function KitchenPage() {
       ],
       elapsedMinutes: 14,
       priority: "medium",
-      status: "preparing"
+      status: "preparing",
+      branchId: "uttara"
     },
     {
       id: "ORD-8818",
@@ -246,7 +299,8 @@ export default function KitchenPage() {
       ],
       elapsedMinutes: 3,
       priority: "high",
-      status: "qa"
+      status: "qa",
+      branchId: "gulshan"
     },
     {
       id: "ORD-8816",
@@ -257,7 +311,8 @@ export default function KitchenPage() {
       ],
       elapsedMinutes: 8,
       priority: "low",
-      status: "ready"
+      status: "ready",
+      branchId: "dhanmondi"
     },
     {
       id: "ORD-8815",
@@ -268,9 +323,39 @@ export default function KitchenPage() {
       ],
       elapsedMinutes: 12,
       priority: "medium",
-      status: "delivered"
+      status: "delivered",
+      branchId: "uttara"
     }
   ]);
+
+  // Load custom live orders from localStorage
+  useEffect(() => {
+    try {
+      const storedOrdersStr = localStorage.getItem("live_orders");
+      if (storedOrdersStr) {
+        const liveOrders = JSON.parse(storedOrdersStr);
+        setOrders(prev => {
+          const filteredLive = liveOrders
+            .filter((l: any) => !prev.some(p => p.id === l.id))
+            .map((l: any) => ({
+              id: l.id,
+              table: l.table,
+              items: l.items.map((i: any) => ({ name: i.name, quantity: i.quantity, checked: false })),
+              elapsedMinutes: 1,
+              priority: "medium" as const,
+              status: l.status as any,
+              branchId: l.branchId
+            }));
+          return [...filteredLive, ...prev];
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  // Derived filtered orders list
+  const filteredOrders = orders.filter(o => o.branchId === selectedBranchId);
 
   // Simulate timer incrementing every minute
   useEffect(() => {
@@ -317,11 +402,11 @@ export default function KitchenPage() {
   };
 
   // Helper to count active order categories
-  const newOrders = orders.filter(o => o.status === "new");
-  const preparingOrders = orders.filter(o => o.status === "preparing");
-  const qaOrders = orders.filter(o => o.status === "qa");
-  const readyOrders = orders.filter(o => o.status === "ready");
-  const deliveredOrders = orders.filter(o => o.status === "delivered");
+  const newOrders = filteredOrders.filter(o => o.status === "new");
+  const preparingOrders = filteredOrders.filter(o => o.status === "preparing");
+  const qaOrders = filteredOrders.filter(o => o.status === "qa");
+  const readyOrders = filteredOrders.filter(o => o.status === "ready");
+  const deliveredOrders = filteredOrders.filter(o => o.status === "delivered");
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex text-slate-800 font-sans overflow-hidden">
@@ -380,6 +465,24 @@ export default function KitchenPage() {
           </div>
           
           <div className="flex items-center gap-4">
+            {/* Branch Switcher (Admin-only interactive) */}
+            {userRole === "admin" && (
+              <div className="relative">
+                <select
+                  value={selectedBranchId}
+                  onChange={(e) => setSelectedBranchId(e.target.value)}
+                  disabled={userRole !== "admin"}
+                  className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-250 bg-white cursor-pointer text-slate-800 hover:bg-slate-50"
+                >
+                  {allBranches.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="relative">
               <button className="p-2 rounded-lg hover:bg-slate-100 text-slate-550 hover:text-slate-855 transition-colors relative">
                 <Bell className="w-[18px] h-[18px]" />
@@ -391,7 +494,7 @@ export default function KitchenPage() {
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#ff7a00] to-amber-500 flex items-center justify-center font-bold text-xs text-white">
                 CH
               </div>
-              <span className="hidden md:inline text-xs font-semibold text-slate-600">Color Hut Kitchen</span>
+              <span className="hidden md:inline text-xs font-semibold text-slate-600">{userDisplayName}</span>
             </div>
           </div>
         </header>

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
+import { RESTAURANTS } from "../data/restaurants";
 import { 
   Menu, 
   Bell, 
@@ -24,6 +25,8 @@ interface Order {
   status: "pending" | "preparing" | "ready" | "completed" | "cancelled" | "unpaid";
   paymentType: "Cash" | "Card" | "Unpaid";
   customerName?: string;
+  branchId?: string;
+  branchName?: string;
 }
 
 export default function OrdersPage() {
@@ -35,11 +38,59 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+  // Dynamic user roles and branch states
+  const [userRole, setUserRole] = useState("admin");
+  const [userDisplayName, setUserDisplayName] = useState("Color Hut Admin");
+  const [userAssignedBranchId, setUserAssignedBranchId] = useState("");
+  const [selectedBranchId, setSelectedBranchId] = useState("all");
+  const [allBranches, setAllBranches] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (isLoggedIn !== "true") {
+        router.replace("/login");
+        return;
+      }
+      
+      const role = localStorage.getItem("userRole") || "admin";
+      const name = localStorage.getItem("userDisplayName") || "Color Hut Admin";
+      const branchId = localStorage.getItem("userAssignedBranchId") || "";
+      
+      setUserRole(role);
+      setUserDisplayName(name);
+      setUserAssignedBranchId(branchId);
+      
+      if (role === "manager" && branchId) {
+        setSelectedBranchId(branchId);
+      } else {
+        setSelectedBranchId("all");
+      }
+    }
+  }, [router]);
+
+  // Load branches
+  useEffect(() => {
+    const restaurant = RESTAURANTS.find(r => r.id === 1);
+    const defaults = restaurant?.branches || [];
+    try {
+      const storedBranchesStr = localStorage.getItem("restaurant_branches");
+      if (storedBranchesStr) {
+        const customs = JSON.parse(storedBranchesStr);
+        setAllBranches([...defaults, ...customs]);
+      } else {
+        setAllBranches(defaults);
+      }
+    } catch (e) {
+      setAllBranches(defaults);
+    }
+  }, []);
+
   const handleLogout = () => {
     router.push("/login");
   };
 
-  // Mock Orders Data
+  // Mock Orders Data (with branchId/branchName fields)
   const [orders, setOrders] = useState<Order[]>([
     {
       id: "ORD-8821",
@@ -51,7 +102,9 @@ export default function OrdersPage() {
       time: "16:35",
       status: "preparing",
       paymentType: "Card",
-      customerName: "Imran Khan"
+      customerName: "Imran Khan",
+      branchId: "dhanmondi",
+      branchName: "Dhanmondi"
     },
     {
       id: "ORD-8820",
@@ -62,7 +115,9 @@ export default function OrdersPage() {
       ],
       time: "16:32",
       status: "pending",
-      paymentType: "Unpaid"
+      paymentType: "Unpaid",
+      branchId: "gulshan",
+      branchName: "Gulshan"
     },
     {
       id: "ORD-8819",
@@ -74,7 +129,9 @@ export default function OrdersPage() {
       time: "16:25",
       status: "ready",
       paymentType: "Cash",
-      customerName: "Ayesha Rahman"
+      customerName: "Ayesha Rahman",
+      branchId: "uttara",
+      branchName: "Uttara"
     },
     {
       id: "ORD-8818",
@@ -84,7 +141,9 @@ export default function OrdersPage() {
       ],
       time: "16:18",
       status: "completed",
-      paymentType: "Card"
+      paymentType: "Card",
+      branchId: "dhanmondi",
+      branchName: "Dhanmondi"
     },
     {
       id: "ORD-8817",
@@ -95,7 +154,9 @@ export default function OrdersPage() {
       ],
       time: "16:02",
       status: "cancelled",
-      paymentType: "Unpaid"
+      paymentType: "Unpaid",
+      branchId: "gulshan",
+      branchName: "Gulshan"
     },
     {
       id: "ORD-8816",
@@ -107,9 +168,27 @@ export default function OrdersPage() {
       time: "15:45",
       status: "unpaid",
       paymentType: "Unpaid",
-      customerName: "Tanvir Hasan"
+      customerName: "Tanvir Hasan",
+      branchId: "uttara",
+      branchName: "Uttara"
     }
   ]);
+
+  // Load custom live orders from localStorage
+  useEffect(() => {
+    try {
+      const storedOrdersStr = localStorage.getItem("live_orders");
+      if (storedOrdersStr) {
+        const liveOrders = JSON.parse(storedOrdersStr);
+        setOrders(prev => {
+          const filteredLive = liveOrders.filter((l: any) => !prev.some(p => p.id === l.id));
+          return [...filteredLive, ...prev];
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
 
   const updateOrderStatus = (orderId: string, newStatus: Order["status"]) => {
     setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
@@ -118,11 +197,134 @@ export default function OrdersPage() {
     }
   };
 
+  const printReceipt = (order: Order) => {
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "absolute";
+    iframe.style.width = "0px";
+    iframe.style.height = "0px";
+    iframe.style.border = "none";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document || iframe.contentDocument;
+    if (!doc) return;
+
+    const subtotal = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    const receiptHtml = `
+      <html>
+      <head>
+        <title>Receipt ${order.id}</title>
+        <style>
+          @page {
+            margin: 0;
+            size: auto;
+          }
+          body {
+            margin: 0;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            color: #000;
+            width: 76mm;
+            box-sizing: border-box;
+          }
+          .text-center { text-align: center; }
+          .text-right { text-align: right; }
+          .bold { font-weight: bold; }
+          .header { margin-bottom: 12px; }
+          .restaurant-name { font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
+          .divider { border-top: 1px dashed #000; margin: 8px 0; }
+          .item-table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+          .item-table th, .item-table td { padding: 3px 0; text-align: left; vertical-align: top; }
+          .item-table th { font-weight: bold; }
+          .totals-table { width: 100%; margin-top: 6px; }
+          .totals-table td { padding: 2px 0; }
+          .footer { margin-top: 18px; font-size: 11px; }
+        </style>
+      </head>
+      <body>
+        <div class="header text-center">
+          <div class="restaurant-name">Red Chili Chinese</div>
+          <div>Digital Menu POS System</div>
+          <div class="divider"></div>
+          <div><strong>Order Receipt</strong></div>
+          <div>Order ID: ${order.id}</div>
+          <div>Table: Table ${order.table}</div>
+          <div>Time: ${order.time}</div>
+          ${order.customerName ? `<div>Customer: ${order.customerName}</div>` : ""}
+        </div>
+        
+        <div class="divider"></div>
+        
+        <table class="item-table">
+          <thead>
+            <tr>
+              <th style="width: 55%;">Item</th>
+              <th style="width: 15%; text-align: center;">Qty</th>
+              <th style="width: 30%; text-align: right;">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order.items.map(item => `
+              <tr>
+                <td>${item.name}</td>
+                <td style="text-align: center;">${item.quantity}</td>
+                <td style="text-align: right;">$${(item.price * item.quantity).toFixed(2)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        
+        <div class="divider"></div>
+        
+        <table class="totals-table">
+          <tr>
+            <td>Subtotal:</td>
+            <td style="text-align: right;">$${subtotal.toFixed(2)}</td>
+          </tr>
+          <tr>
+            <td>Payment:</td>
+            <td style="text-align: right;">${order.paymentType}</td>
+          </tr>
+          <tr class="bold">
+            <td>Total:</td>
+            <td style="text-align: right;">$${subtotal.toFixed(2)}</td>
+          </tr>
+        </table>
+        
+        <div class="divider"></div>
+        
+        <div class="footer text-center">
+          <p>Thank you for dining with us!</p>
+          <p>Powered by Digital Food Menu</p>
+        </div>
+        
+        <script>
+          window.onload = function() {
+            window.focus();
+            window.print();
+            setTimeout(function() {
+              window.frameElement.parentNode.removeChild(window.frameElement);
+            }, 500);
+          }
+        </script>
+      </body>
+      </html>
+    `;
+
+    doc.open();
+    doc.write(receiptHtml);
+    doc.close();
+  };
+
   const calculateSubtotal = (order: Order) => {
     return order.items.reduce((acc, curr) => acc + curr.price * curr.quantity, 0);
   };
 
   const filteredOrders = orders.filter(o => {
+    // Branch Filter
+    if (selectedBranchId !== "all" && o.branchId !== selectedBranchId) return false;
+
     // Tab Filter
     if (filterTab === "active" && (o.status === "completed" || o.status === "cancelled")) return false;
     if (filterTab === "completed" && o.status !== "completed") return false;
@@ -194,6 +396,25 @@ export default function OrdersPage() {
           </div>
           
           <div className="flex items-center gap-4">
+            {/* Branch Switcher (Admin-only interactive) */}
+            {userRole === "admin" && (
+              <div className="relative">
+                <select
+                  value={selectedBranchId}
+                  onChange={(e) => setSelectedBranchId(e.target.value)}
+                  disabled={userRole !== "admin"}
+                  className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-250 bg-white cursor-pointer text-slate-800 hover:bg-slate-50"
+                >
+                  <option value="all">All Branches</option>
+                  {allBranches.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="relative">
               <button className="p-2 rounded-lg hover:bg-slate-100 text-slate-550 hover:text-slate-850 transition-colors relative">
                 <Bell className="w-[18px] h-[18px]" />
@@ -205,7 +426,7 @@ export default function OrdersPage() {
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#ff7a00] to-amber-500 flex items-center justify-center font-bold text-xs text-white">
                 CH
               </div>
-              <span className="hidden md:inline text-xs font-semibold text-slate-600">Color Hut Admin</span>
+              <span className="hidden md:inline text-xs font-semibold text-slate-600">{userDisplayName}</span>
             </div>
           </div>
         </header>
@@ -229,7 +450,7 @@ export default function OrdersPage() {
                 ].map(tab => (
                   <button
                     key={tab.id}
-                    onClick={() => setFilterTab(tab.id as any)}
+                    onClick={() => setFilterTab(tab.id as "all" | "active" | "completed" | "unpaid" | "cancelled")}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                       filterTab === tab.id 
                         ? "bg-[#ff7a00] text-white shadow-sm"
@@ -351,7 +572,7 @@ export default function OrdersPage() {
                       ].map(st => (
                         <button
                           key={st.id}
-                          onClick={() => updateOrderStatus(selectedOrder.id, st.id as any)}
+                          onClick={() => updateOrderStatus(selectedOrder.id, st.id as Order["status"])}
                           className={`px-2.5 py-1 rounded-lg font-bold border transition-colors ${
                             selectedOrder.status === st.id
                               ? "bg-[#ff7a00] border-[#ff7a00] text-white shadow-sm"
@@ -364,7 +585,7 @@ export default function OrdersPage() {
                     </div>
                   </div>
 
-                  {/* Items List */}
+                  {/* Unified Order Card */}
                   <div className="flex flex-col gap-2 mt-2 bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm">
                     <span className="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100 pb-1.5">Items</span>
                     <div className="flex flex-col gap-2">
@@ -378,34 +599,33 @@ export default function OrdersPage() {
                       ))}
                     </div>
                     
-                    <div className="border-t border-slate-100 pt-2.5 flex justify-between font-bold text-sm">
+                    <div className="border-y border-slate-100 py-2.5 my-1 flex justify-between font-bold text-sm">
                       <span className="text-slate-700">Total</span>
                       <span className="text-[#ff7a00]">${calculateSubtotal(selectedOrder).toFixed(2)}</span>
                     </div>
-                  </div>
 
-                  {/* Order info list */}
-                  <div className="flex flex-col gap-2.5 bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
-                    <div className="flex justify-between">
-                      <span className="text-slate-500 font-semibold">Customer:</span>
-                      <span className="text-slate-700 font-bold">{selectedOrder.customerName || "Walk-in"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500 font-semibold">Ordered At:</span>
-                      <span className="text-slate-700 font-bold">{selectedOrder.time}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500 font-semibold">Payment:</span>
-                      <span className={`font-bold ${selectedOrder.paymentType === "Unpaid" ? "text-rose-600" : "text-emerald-600"}`}>
-                        {selectedOrder.paymentType}
-                      </span>
+                    <div className="flex flex-col gap-2.5 pt-1.5">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500 font-semibold">Customer:</span>
+                        <span className="text-slate-700 font-bold">{selectedOrder.customerName || "Walk-in"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500 font-semibold">Ordered At:</span>
+                        <span className="text-slate-700 font-bold">{selectedOrder.time}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500 font-semibold">Payment:</span>
+                        <span className={`font-bold ${selectedOrder.paymentType === "Unpaid" ? "text-rose-600" : "text-emerald-600"}`}>
+                          {selectedOrder.paymentType}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Action Buttons */}
                   <div className="flex flex-col gap-2 mt-4">
                     <button 
-                      onClick={() => alert("Printing receipt to receipt printer...")}
+                      onClick={() => selectedOrder && printReceipt(selectedOrder)}
                       className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-xs text-slate-800 font-bold transition-all shadow-sm"
                     >
                       <Printer className="w-4 h-4 text-slate-400" /> Print Bill Receipt
