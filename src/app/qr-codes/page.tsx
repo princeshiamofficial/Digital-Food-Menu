@@ -50,6 +50,10 @@ export default function QrCodesPage() {
       }
       
       const role = localStorage.getItem("userRole") || "admin";
+      if (role === "admin") {
+        router.replace("/dashboard");
+        return;
+      }
       const name = localStorage.getItem("userDisplayName") || "Color Hut Admin";
       const branchId = localStorage.getItem("userAssignedBranchId") || "";
       
@@ -336,7 +340,7 @@ export default function QrCodesPage() {
                   return (
                     <div 
                       key={i} 
-                      className="bg-slate-50/50 border border-slate-200 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center gap-2.5 shadow-sm hover:shadow-md hover:border-slate-350 transition-all duration-300 group aspect-square relative cursor-pointer"
+                      className="bg-slate-50/50 border border-slate-200 rounded-tr-2xl rounded-bl-2xl rounded-tl-none rounded-br-none p-2.5 flex flex-col items-center justify-center text-center gap-2.5 shadow-sm hover:shadow-md hover:border-slate-350 transition-all duration-300 group aspect-square relative cursor-pointer"
                       onClick={() => setPreviewQr({ name: table.name, location: table.location, url: tableUrl })}
                     >
                       {/* Action buttons overlay (visible on hover) */}
@@ -365,7 +369,7 @@ export default function QrCodesPage() {
                         </button>
                       </div>
 
-                      <div className="p-1.5 rounded-xl bg-white text-slate-900 shrink-0 border border-slate-200 shadow-inner w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center overflow-hidden hover:border-[#ff7a00] transition-colors duration-300 relative select-none">
+                      <div className="p-1.5 rounded-tr-xl rounded-bl-xl rounded-tl-none rounded-br-none bg-white text-slate-900 shrink-0 border border-slate-200 shadow-inner w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center overflow-hidden hover:border-[#ff7a00] transition-colors duration-300 relative select-none">
                         <img 
                           src={qrImageUrl} 
                           alt={`${table.name} QR Code`}
@@ -400,7 +404,7 @@ export default function QrCodesPage() {
       {previewQr && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div 
-            className="bg-white rounded-3xl p-6 max-w-sm w-full flex flex-col gap-5 shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-slate-100 animate-in zoom-in-95 duration-200"
+            className="bg-white rounded-tr-3xl rounded-bl-3xl rounded-tl-none rounded-br-none p-6 max-w-sm w-full flex flex-col gap-5 shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-slate-100 animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -420,7 +424,7 @@ export default function QrCodesPage() {
 
             {/* QR Card Body */}
             <div className="flex flex-col items-center gap-4 bg-slate-50 border border-slate-100 rounded-2xl p-6 text-center shadow-inner relative group">
-              <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-md relative flex items-center justify-center select-none">
+              <div className="bg-white p-3 rounded-tr-2xl rounded-bl-2xl rounded-tl-none rounded-br-none border border-slate-200 shadow-md relative flex items-center justify-center select-none">
                 <img 
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(previewQr.url)}`}
                   alt={`${previewQr.name} QR Code`}

@@ -57,7 +57,7 @@ export default function Sidebar({
     { id: "menu-availability", label: "Menu", icon: Utensils },
     { id: "categories", label: "Categories", icon: Tags },
     ...(userRole === "admin" ? [{ id: "branches", label: "Manage Branch", icon: Store, href: "/branches" }] : []),
-    { id: "qr-codes", label: "Table QR Codes", icon: QrCode, href: "/qr-codes" },
+    ...(userRole !== "admin" ? [{ id: "qr-codes", label: "Table QR Codes", icon: QrCode, href: "/qr-codes" }] : []),
     ...(userRole === "admin" ? [{ id: "settings", label: "Settings", icon: Settings }] : []),
   ];
 
